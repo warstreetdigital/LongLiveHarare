@@ -1,23 +1,372 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Long Live Harare</title>
-    <meta name="description" content="A digital layer of Harare, Zimbabwe. Explore streets, music, and culture." />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTER HARARE | Digital City Experience</title>
     
-    <!-- Social Media Meta Tags -->
-    <meta property="og:title" content="Long Live Harare" />
-    <meta property="og:description" content="A digital layer of Harare, Zimbabwe. Explore streets, music, and culture." />
-    <meta property="og:type" content="website" />
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+    <style>
+        /* --- CORE STYLES --- */
+        :root {
+            --bg: #0A0A0A;
+            --surface: #111111;
+            --text: #F5F5F5;
+            --gray: #666;
+            --accent: #D4AF37;
+            --whatsapp: #25D366;
+            --card-radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Antonio', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- HOME VIEW --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(60px, 15vw, 120px);
+            line-height: 0.85;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .hero .sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4em; color: var(--gray); font-weight: 500; }
+        .hero .branding { margin-top: 48px; }
+        .hero .long-live { font-size: 14px; letter-spacing: 0.2em; color: #888; font-weight: 300; margin-bottom: 60px; }
+        .hero .choose { font-size: 11px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
+
+        .street-container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+
+        .street-card {
+            position: relative;
+            width: 100%;
+            height: 45vh;
+            min-height: 320px;
+            margin-bottom: 16px;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 32px;
+            transition: transform 0.2s ease;
+        }
+
+        .street-card:active { transform: scale(0.97); }
+
+        .street-card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+        .street-card .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%); z-index: -1; }
+        .street-card .sub-text { font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.7; margin-bottom: 8px; font-weight: 500; }
+        .street-card h2 { font-size: 42px; line-height: 1; margin-bottom: 8px; }
+        .street-card p { font-size: 14px; font-weight: 300; color: #ccc; letter-spacing: 0.02em; }
+
+        /* --- INEZ TERRACE VIEW --- */
+        .street-page { max-width: 600px; margin: 0 auto; min-height: 100vh; }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .back-btn { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); background: none; border: none; cursor: pointer; margin-bottom: 16px; display: block; }
+        .header h1 { font-size: 32px; line-height: 1; }
+        .header .tagline { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); margin-top: 4px; }
+
+        .bag-status { text-align: right; }
+        .bag-status .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+        .bag-status .feedback { font-size: 10px; color: #2ecc71; margin-top: 4px; display: none; }
+
+        .section { padding: 48px 24px; }
+        .section-title { font-size: 24px; margin-bottom: 8px; }
+        .section-subtext { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); margin-bottom: 24px; }
+
+        /* Custom Radio Player */
+        .radio-box {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: var(--card-radius);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .radio-info { display: flex; align-items: center; gap: 16px; }
+        .radio-pulse { width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
+        .radio-pulse.playing { animation: pulse 2s infinite; }
+        .radio-dot { width: 8px; height: 8px; background: #ff4444; border-radius: 50%; }
+        .radio-text h4 { font-size: 12px; font-weight: 900; letter-spacing: 0.1em; }
+        .radio-text p { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.1em; }
+        .play-btn { width: 56px; height: 56px; border-radius: 50%; background: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .play-btn:hover { transform: scale(1.05); }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.1); } 70% { box-shadow: 0 0 0 20px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+
+        /* Drops */
+        .product-card { margin-bottom: 48px; }
+        .product-img { width: 100%; aspect-ratio: 4/5; background: var(--surface); border-radius: var(--card-radius); overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: 0.5s; }
+        .product-card:hover img { filter: grayscale(0); }
+        .product-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .product-name { font-size: 18px; font-weight: 700; max-width: 70%; }
+        .product-price { font-size: 20px; font-weight: 900; font-family: 'Antonio', sans-serif; }
+        .product-meta { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray); margin-bottom: 8px; }
+        .scarcity { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700; margin-bottom: 20px; }
+        .add-btn { width: 100%; padding: 16px; background: white; color: black; border: none; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; }
+        .modal-content { 
+            width: 100%; max-width: 500px; background: var(--surface); border-radius: 32px 32px 0 0; 
+            padding: 32px; border-top: 1px solid rgba(255,255,255,0.1); 
+            max-height: 90vh; overflow-y: auto;
+        }
+        @media (min-width: 600px) { .modal-overlay { align-items: center; } .modal-content { border-radius: 32px; border: 1px solid rgba(255,255,255,0.1); } }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+        .modal-header h3 { font-size: 24px; line-height: 1; }
+        .close-modal { background: none; border: none; color: var(--gray); font-size: 24px; cursor: pointer; }
+
+        .qty-selector { display: flex; align-items: center; justify-content: center; gap: 32px; padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .qty-btn { width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: none; color: white; font-size: 24px; cursor: pointer; }
+        .qty-val { font-size: 64px; font-weight: 900; font-family: 'Antonio', sans-serif; }
+
+        .discount-badge { background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.2); padding: 16px; border-radius: 12px; color: #2ecc71; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 24px 0; display: flex; justify-content: space-between; align-items: center; }
+        
+        .modal-delivery { margin-bottom: 32px; }
+        .modal-delivery h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); margin-bottom: 12px; }
+        .delivery-option { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; }
+        .delivery-option.free { border-color: rgba(46, 204, 113, 0.3); background: rgba(46, 204, 113, 0.05); }
+        .delivery-option.free span:last-child { color: #2ecc71; font-weight: 900; }
+
+        .modal-total { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+        .modal-total span:first-child { font-size: 14px; color: var(--gray); }
+        .modal-total .price { font-size: 32px; font-weight: 900; font-family: 'Antonio', sans-serif; }
+
+        .confirm-btn { width: 100%; padding: 20px; background: white; color: black; border: none; border-radius: 16px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; }
+
+        /* Checkout */
+        .checkout-btn { width: 100%; padding: 24px; background: var(--whatsapp); color: black; border: none; border-radius: var(--card-radius); font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; margin-bottom: 100px; }
+
+        footer { padding: 80px 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        footer p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5em; color: #444; }
+    </style>
+</head>
+<body>
+
+    <!-- HOME VIEW -->
+    <div id="home">
+        <section class="hero">
+            <h1>ENTER <br> HARARE</h1>
+            <p class="sub-label">A digital layer of the city</p>
+            <div class="branding">
+                <p class="long-live">LONG LIVE HARARE</p>
+                <span class="choose">Choose your street</span>
+            </div>
+        </section>
+
+        <div class="street-container">
+            <div class="street-card" onclick="openStreet('inez')">
+                <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000" alt="Inez Terrace">
+                <div class="overlay"></div>
+                <span class="sub-text">Drops / What’s happening now</span>
+                <h2>INEZ TERRACE</h2>
+                <p>Access. Hustle. Movement.</p>
+            </div>
+            <div class="street-card">
+                <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000" alt="Samora Machel">
+                <div class="overlay"></div>
+                <span class="sub-text">Music / Events / Artists</span>
+                <h2>SAMORA MACHEL</h2>
+                <p>Sound. Energy. Nightlife.</p>
+            </div>
+        </div>
+        <footer><p>ENTER HARARE &copy; 2026</p></footer>
+    </div>
+
+    <!-- INEZ TERRACE VIEW -->
+    <div id="inez" class="street-page hidden">
+        <header class="header">
+            <div>
+                <button class="back-btn" onclick="goHome()">← Back to City</button>
+                <h1>INEZ TERRACE</h1>
+                <p class="tagline">Access. Hustle. Movement.</p>
+            </div>
+            <div class="bag-status">
+                <div class="label">Street Bag (<span id="bag-count">0</span>)</div>
+                <div id="bag-feedback" class="feedback">Added to your Street Bag</div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Custom Radio -->
+            <section class="section">
+                <h2 class="section-title">STREET RADIO</h2>
+                <p class="section-subtext">What’s happening in the city right now</p>
+                <div class="radio-box">
+                    <div class="radio-info">
+                        <div id="radio-pulse" class="radio-pulse"><div class="radio-dot"></div></div>
+                        <div class="radio-text">
+                            <h4>LIVE BROADCAST</h4>
+                            <p>Harare CBD Frequency</p>
+                        </div>
+                    </div>
+                    <button class="play-btn" onclick="toggleRadio()">
+                        <svg id="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
+                        <svg id="pause-icon" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
+                    </button>
+                    <audio id="street-audio" loop><source src="street_radio.mp3" type="audio/mpeg"></audio>
+                </div>
+            </section>
+
+            <!-- Drops -->
+            <section class="section">
+                <h2 class="section-title">NEW DROPS</h2>
+                <div class="product-card">
+                    <div class="product-img"><img src="drop01.jpg" alt="Drop 01"></div>
+                    <div class="product-info"><div class="product-name">Long Live Harare Tee — Drop 01</div><div class="product-price">$25</div></div>
+                    <p class="product-meta">Discounts available</p><p class="scarcity">Limited release</p>
+                    <button class="add-btn" onclick="openModal('Long Live Harare Tee — Drop 01', 25)">ADD TO STREET BAG</button>
+                </div>
+                <div class="product-card">
+                    <div class="product-img"><img src="drop02.jpg" alt="Drop 02"></div>
+                    <div class="product-info"><div class="product-name">Long Live Harare Tee — Drop 02</div><div class="product-price">$25</div></div>
+                    <p class="product-meta">Discounts available</p><p class="scarcity">Limited release</p>
+                    <button class="add-btn" onclick="openModal('Long Live Harare Tee — Drop 02', 25)">ADD TO STREET BAG</button>
+                </div>
+            </section>
+
+            <section class="section"><button class="checkout-btn" onclick="checkout()">CHECKOUT ON WHATSAPP</button></section>
+        </main>
+    </div>
+
+    <!-- QUANTITY MODAL -->
+    <div id="qty-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div><h3 id="modal-product-name">PRODUCT NAME</h3><p class="section-subtext">Select Quantity</p></div>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="qty-selector">
+                <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                <div id="qty-val" class="qty-val">1</div>
+                <button class="qty-btn" onclick="updateQty(1)">+</button>
+            </div>
+            <div id="discount-badge" class="discount-badge hidden"><span>Bulk Discount Applied</span><span>-$2.00</span></div>
+            <div class="modal-delivery">
+                <h4>Delivery Options</h4>
+                <div id="delivery-cbd" class="delivery-option"><span>Harare CBD</span><span>$2.00</span></div>
+                <div class="delivery-option"><span>Pickup (CBD)</span><span>FREE</span></div>
+            </div>
+            <div class="modal-total"><span>Total</span><div id="modal-total-price" class="price">$25</div></div>
+            <button class="confirm-btn" onclick="confirmAdd()">CONFIRM & ADD TO BAG</button>
+        </div>
+    </div>
+
+    <script>
+        let bag = [];
+        let isPlaying = false;
+        let currentProduct = null;
+        let currentQty = 1;
+
+        function toggleRadio() {
+            const audio = document.getElementById('street-audio');
+            const pulse = document.getElementById('radio-pulse');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            if (isPlaying) { audio.pause(); playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); pulse.classList.remove('playing'); }
+            else { audio.play(); playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); pulse.classList.add('playing'); }
+            isPlaying = !isPlaying;
+        }
+
+        function openStreet(id) { document.getElementById('home').classList.add('hidden'); document.getElementById(id).classList.remove('hidden'); window.scrollTo(0, 0); }
+        function goHome() { document.getElementById('inez').classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); window.scrollTo(0, 0); }
+
+        function openModal(name, price) {
+            currentProduct = { name, price };
+            currentQty = 1;
+            document.getElementById('modal-product-name').innerText = name;
+            updateModalUI();
+            document.getElementById('qty-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('qty-modal').classList.add('hidden'); }
+
+        function updateQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            updateModalUI();
+        }
+
+        function updateModalUI() {
+            document.getElementById('qty-val').innerText = currentQty;
+            const discount = currentQty >= 4 ? 2 : 0;
+            const total = (currentProduct.price * currentQty) - discount;
+            document.getElementById('modal-total-price').innerText = `$${total}`;
+            
+            const badge = document.getElementById('discount-badge');
+            const deliveryCbd = document.getElementById('delivery-cbd');
+            
+            if (currentQty >= 4) {
+                badge.classList.remove('hidden');
+                deliveryCbd.classList.add('free');
+                deliveryCbd.innerHTML = '<span>Harare CBD</span><span>FREE</span>';
+            } else {
+                badge.classList.add('hidden');
+                deliveryCbd.classList.remove('free');
+                deliveryCbd.innerHTML = '<span>Harare CBD</span><span>$2.00</span>';
+            }
+        }
+
+        function confirmAdd() {
+            bag.push({ ...currentProduct, qty: currentQty });
+            let totalCount = bag.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('bag-count').innerText = totalCount;
+            const feedback = document.getElementById('bag-feedback');
+            feedback.style.display = 'block';
+            setTimeout(() => { feedback.style.display = 'none'; }, 2000);
+            closeModal();
+        }
+
+        function checkout() {
+            const phoneNumber = "263779388560";
+            let itemsText = bag.map(i => `${i.name} x${i.qty}`).join("\n");
+            let hasFree = bag.some(i => i.qty >= 4);
+            const message = `Hello, I want to order:\n\n${itemsText || "None"}\n\nDelivery: ${hasFree ? "FREE (Harare CBD)" : "Standard"}\nLocation: ______`;
+            window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    </script>
+</body>
+                  </html>
