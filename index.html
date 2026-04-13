@@ -9,22 +9,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CORE STYLES --- */
+        /* --- CORE SYSTEM & STATE MACHINE --- */
         :root {
-            --bg: #0A0A0A;
+            --bg-deep: #050505;
+            --bg-main: #0A0A0A;
             --text: #F5F5F5;
             --gray: #666;
             --card-radius: 16px;
+            --p-light: #4C1D95;
+            --b-light: #2563EB;
+            --m-light: #9333EA;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+        }
         
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-deep);
             color: var(--text);
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
             line-height: 1.5;
+            user-select: none;
+            -webkit-user-select: none;
+            /* NO SCROLLING ALLOWED */
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
         }
 
         h1, h2 {
@@ -33,256 +45,390 @@
             letter-spacing: -0.05em;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* --- STATE VISIBILITY CONTROL --- */
+        body.state-billboard .hero { opacity: 1; visibility: visible; pointer-events: auto; }
+        body.state-billboard .street-container { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        .animate-in {
-            animation: fadeInUp 1.2s cubic-bezier(0.21, 0.45, 0.32, 0.9) forwards;
-        }
+        body.state-streets .hero { opacity: 0; visibility: hidden; pointer-events: none; }
+        body.state-streets .street-container { opacity: 1; visibility: visible; pointer-events: auto; }
 
-        /* --- HERO SECTION --- */
+        /* --- BILLBOARD LAYER: FOUNDATION --- */
         .hero {
-            height: 100vh;
+            position: fixed;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 0 24px;
-        }
-
-        .hero h1 {
-            font-size: clamp(60px, 15vw, 120px);
-            line-height: 0.85;
-            margin-bottom: 16px;
-            font-weight: 700;
-        }
-
-        .hero .sub-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.4em;
-            color: var(--gray);
-            font-weight: 500;
-        }
-
-        .hero .branding {
-            margin-top: 48px;
-        }
-
-        .hero .long-live {
-            font-size: 14px;
-            letter-spacing: 0.2em;
-            color: #888;
-            font-weight: 300;
-            margin-bottom: 60px;
-        }
-
-        .hero .choose {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            font-weight: 700;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 8px;
-        }
-
-        /* --- STREET CARDS --- */
-        .street-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 16px 80px;
-        }
-
-        .street-card {
-            position: relative;
-            width: 100%;
-            height: 45vh;
-            min-height: 320px;
-            margin-bottom: 16px;
-            border-radius: var(--card-radius);
             overflow: hidden;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 32px;
-            transition: transform 0.3s ease;
-            text-decoration: none;
-            color: white;
+            z-index: 100;
+            background: var(--bg-deep);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .street-card:active {
-            transform: scale(0.97);
-        }
-
-        .street-card img {
+        /* --- AMBIENT LIGHT ENGINE --- */
+        .ambient-engine { position: absolute; inset: 0; z-index: 1; }
+        .light-field {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            transition: transform 1.5s ease;
+            width: 120vw; height: 120vh;
+            filter: blur(100px); opacity: 0.18;
+            border-radius: 50%;
+            animation: drift 30s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        .field-1 { background: var(--p-light); top: -20%; left: -20%; animation-duration: 25s; }
+        .field-2 { background: var(--b-light); bottom: -20%; right: -20%; animation-duration: 35s; animation-delay: -5s; }
+        .field-3 { background: var(--m-light); top: 20%; left: 30%; width: 80vw; height: 80vh; animation-duration: 40s; }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 10%) scale(1.1); }
         }
 
-        .street-card:hover img {
-            transform: scale(1.05);
+        /* --- WORD CURTAIN --- */
+        .word-curtain {
+            position: absolute; inset: 0; z-index: 2;
+            display: flex; flex-direction: column; justify-content: space-around;
+            pointer-events: none; overflow: hidden; padding: 5vh 0;
+        }
+        .curtain-text {
+            font-family: 'Antonio', sans-serif; font-size: 15vw; font-weight: 700;
+            color: white; opacity: 0.04; white-space: nowrap; letter-spacing: 0.1em;
+            animation: curtainDrift 50s infinite linear;
+        }
+        .curtain-text:nth-child(2) { animation-duration: 70s; animation-direction: reverse; opacity: 0.03; }
+        .curtain-text:nth-child(3) { animation-duration: 40s; opacity: 0.05; }
+
+        @keyframes curtainDrift {
+            from { transform: translateX(-20%); }
+            to { transform: translateX(20%); }
         }
 
-        .street-card .overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%);
-            z-index: -1;
+        /* --- AUTHORITY HUD --- */
+        .authority-hud {
+            display: flex; gap: 24px; margin-bottom: 24px; opacity: 0.5;
+            font-size: 9px; letter-spacing: 0.4em; font-weight: 700;
+            text-transform: uppercase; animation: hudFlicker 4s infinite;
+        }
+        @keyframes hudFlicker { 0%, 95%, 100% { opacity: 0.5; } 96% { opacity: 0.2; } 97% { opacity: 0.8; } }
+
+        /* --- SIGNALS --- */
+        .signal-overlay {
+            position: absolute; inset: 0; z-index: 3; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px; opacity: 0.3;
+        }
+        .directional-sweep {
+            position: absolute; top: -100%; left: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none;
+        }
+        .sweep-layer {
+            position: absolute; width: 100%; height: 40%;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+            animation: downwardSignal 6s infinite ease-in;
+        }
+        @keyframes downwardSignal {
+            0% { transform: translateY(-100%); opacity: 0; }
+            30% { opacity: 1; }
+            100% { transform: translateY(300%); opacity: 0; }
         }
 
-        .street-card .sub-text {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            opacity: 0.7;
-            margin-bottom: 8px;
-            font-weight: 500;
+        /* --- TEXT SYSTEM --- */
+        .hero-content {
+            position: relative; z-index: 100;
+            animation: systemHeartbeat 10s infinite ease-in-out;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .hero h1 {
+            font-size: clamp(60px, 15vw, 120px); line-height: 0.85; margin-bottom: 16px; font-weight: 700;
+            animation: textBreath 5s infinite ease-in-out;
+            text-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+        @keyframes textBreath {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
+            50% { transform: scale(1.03); opacity: 1; }
+        }
+        @keyframes systemHeartbeat {
+            0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.1); }
+        }
+        .hero .sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4em; color: var(--gray); font-weight: 500; }
+        .hero .branding { margin-top: 48px; }
+        .hero .choose {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px;
         }
 
-        .street-card h2 {
-            font-size: 42px;
-            line-height: 1;
-            margin-bottom: 8px;
+        /* --- TRANSITION MOMENTS --- */
+        .energy-drop {
+            position: fixed; top: 0; left: 50%; width: 40px; height: 100vh;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), #fff, rgba(255,255,255,0.3), transparent);
+            box-shadow: 0 0 60px 10px rgba(255,255,255,0.2);
+            z-index: 9999; transform: translateX(-50%) translateY(-100%);
+            opacity: 0; pointer-events: none; filter: blur(8px);
+        }
+        .energy-drop.active { animation: cinematicBeam 0.9s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        @keyframes cinematicBeam {
+            0% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            20%, 80% { opacity: 1; }
+            100% { transform: translateX(-50%) translateY(100%); opacity: 0; }
         }
 
-        .street-card p {
-            font-size: 14px;
-            font-weight: 300;
-            color: #ccc;
-            letter-spacing: 0.02em;
-        }
+        .hero.responding { filter: brightness(1.3); }
+        .hero.responding .hero-content { transform: scale(1.03); }
 
-        /* --- FOOTER --- */
-        footer {
-            padding: 80px 0 40px;
-            text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
+        /* Arrival Overlay */
+        #arrival-overlay {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; background: var(--bg-deep);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
         }
+        #arrival-overlay.active { opacity: 1; }
+        #arrival-overlay h3 {
+            font-family: 'Antonio', sans-serif; font-size: 24px; letter-spacing: 0.5em;
+            text-transform: uppercase; margin-bottom: 8px;
+            transform: translateY(10px) scale(0.96); transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #arrival-overlay p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); opacity: 0; transition: opacity 0.8s ease 0.2s; }
+        #arrival-overlay.animating h3 { transform: translateY(0) scale(1); animation: glowPulse 2s infinite ease-in-out; }
+        #arrival-overlay.animating p { opacity: 1; }
+        @keyframes glowPulse { 0%, 100% { text-shadow: 0 0 10px transparent; } 50% { text-shadow: 0 0 20px rgba(255,255,255,0.4); } }
 
-        footer p {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5em;
-            color: #444;
+        /* --- STREET VIEW HEADER --- */
+        #system-header {
+            position: absolute; top: 40px; width: 100%; text-align: center;
+            opacity: 0; pointer-events: none; transition: opacity 1s ease 0.5s;
+            z-index: 10;
         }
+        #system-header h4 { font-family: 'Antonio', sans-serif; font-size: 14px; letter-spacing: 0.6em; text-transform: uppercase; opacity: 0.8; }
+        #system-header span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em; color: var(--gray); }
+        body.state-streets #system-header { opacity: 1; }
 
-        .powered-by {
-            padding: 0 0 80px;
-            text-align: center;
+        /* --- GESTURE BACK CONTROL --- */
+        #btn-back-gesture {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+            padding: 12px 24px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); color: #fff; cursor: pointer;
+            opacity: 0; pointer-events: none; transition: all 0.4s ease;
         }
+        #btn-back-gesture.visible { opacity: 1; pointer-events: auto; }
+        body.state-streets.dimmed #street-ui { filter: brightness(0.4); }
 
-        .powered-by p {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: #666;
+        /* --- STREET LAYER: CONTENT --- */
+        .street-container {
+            position: fixed; inset: 0; z-index: 20;
+            background: var(--bg-deep); transition: opacity 0.8s ease;
+            overflow-y: auto; overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
+        .street-inner { max-width: 600px; margin: 0 auto; padding: 120px 16px 80px; }
+        .street-card {
+            position: relative; width: 100%; height: 45vh; min-height: 320px;
+            margin-bottom: 16px; border-radius: var(--card-radius); overflow: hidden;
+            cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 32px; transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none; color: white; opacity: 0; transform: translateY(40px);
+        }
+        .street-card.activated { opacity: 1; transform: translateY(0); }
+        .street-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.5s ease; }
+        .street-card .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%); z-index: -1; }
+        .street-card h2 { font-size: 42px; line-height: 1; margin-bottom: 8px; }
+        .street-card .sub-text { font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.7; margin-bottom: 8px; }
 
-        /* --- SCROLL REVEAL --- */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 1s ease-out;
-        }
+        .street-card:nth-child(1) { transition-delay: 0.1s; }
+        .street-card:nth-child(2) { transition-delay: 0.2s; }
+        .street-card:nth-child(3) { transition-delay: 0.3s; }
+        .street-card:nth-child(4) { transition-delay: 0.4s; }
 
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        footer { padding: 40px 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        footer p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5em; color: #444; }
+        .powered-by { padding: 0 0 80px; text-align: center; }
+        .powered-by p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #666; }
+
+        .glitch-flash { animation: flash 0.1s steps(2); }
+        @keyframes flash { 0% { filter: invert(0); } 50% { filter: invert(1) brightness(2); } }
     </style>
 </head>
-<body>
+<body class="state-billboard" oncontextmenu="return false;">
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="animate-in">
+    <!-- Energy Drop Beam -->
+    <div id="energy-drop" class="energy-drop"></div>
+
+    <!-- Arrival Overlay -->
+    <div id="arrival-overlay">
+        <h3>Welcome to Harare</h3>
+        <p>Explore the streets</p>
+    </div>
+
+    <!-- Gesture Back Button -->
+    <div id="btn-back-gesture">Exit District</div>
+
+    <!-- Billboard Layer -->
+    <section class="hero" id="billboard">
+        <div class="ambient-engine">
+            <div class="light-field field-1"></div>
+            <div class="light-field field-2"></div>
+            <div class="light-field field-3"></div>
+        </div>
+        <div class="word-curtain">
+            <div class="curtain-text">ACCESS SIGNAL HARARE DISTRICT LIVE ENTER</div>
+            <div class="curtain-text">ENTER LIVE DISTRICT HARARE SIGNAL ACCESS</div>
+            <div class="curtain-text">HARARE ACCESS SIGNAL ENTER DISTRICT LIVE</div>
+        </div>
+        <div class="signal-overlay"></div>
+        <div class="directional-sweep"><div class="sweep-layer"></div></div>
+        <div class="hero-content">
+            <div class="authority-hud"><span>SIGNAL: HARARE</span><span>STATUS: LIVE</span><span>ACCESS: OPEN</span></div>
             <h1>ENTER <br> HARARE</h1>
             <p class="sub-label">A digital layer of the city</p>
-            
-            <div class="branding">
-                <p class="long-live">LONG LIVE HARARE</p>
-                <span class="choose">Choose your street</span>
-            </div>
+            <div class="branding"><span class="choose">Choose your street</span></div>
         </div>
     </section>
 
-    <!-- Main Interface -->
-    <div class="street-container">
-        
-        <!-- Street 1 -->
-        <a href="https://inezterrace.pages.dev/" class="street-card reveal" target="_blank">
-            <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000" alt="Inez Terrace">
-            <div class="overlay"></div>
-            <span class="sub-text">Drops / What’s happening now</span>
-            <h2>INEZ TERRACE</h2>
-            <p>Access. Hustle. Movement.</p>
-        </a>
-
-        <!-- Street 2 -->
-        <a href="https://samoramachel.pages.dev/" class="street-card reveal" target="_blank">
-            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000" alt="Samora Machel Ave">
-            <div class="overlay"></div>
-            <span class="sub-text">Music / Events / Artists</span>
-            <h2>SAMORA MACHEL</h2>
-            <p>Sound. Energy. Nightlife.</p>
-        </a>
-
-        <!-- Street 3 -->
-        <a href="https://borrowdalerd.pages.dev/" class="street-card reveal" target="_blank">
-            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000" alt="Borrowdale Road">
-            <div class="overlay"></div>
-            <span class="sub-text">Restaurants / Salons / Stores</span>
-            <h2>BORROWDALE RD</h2>
-            <p>Lifestyle. Premium.</p>
-        </a>
-
-        <!-- Street 4 -->
-        <a href="https://nelsonmandela.pages.dev/" class="street-card reveal" target="_blank">
-            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000" alt="Nelson Mandela Ave">
-            <div class="overlay"></div>
-            <span class="sub-text">Stories / Culture</span>
-            <h2>NELSON MANDELA</h2>
-            <p>Voice. Meaning. Identity.</p>
-        </a>
-
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>ENTER HARARE &copy; 2026</p>
-    </footer>
-    <div class="powered-by">
-        <p>Powered by warstreet experience model.</p>
+    <!-- Street Layer -->
+    <div class="street-container" id="street-ui">
+        <div id="system-header">
+            <h4>Harare</h4>
+            <span>Explore the streets</span>
+        </div>
+        <div class="street-inner">
+            <a href="https://inezterrace.pages.dev/" class="street-card" data-street="inez" target="_blank">
+                <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000" alt="Inez">
+                <div class="overlay"></div>
+                <span class="sub-text">Drops / What’s happening now</span>
+                <h2>INEZ TERRACE</h2>
+                <p>Access. Hustle. Movement.</p>
+            </a>
+            <a href="https://samoramachel.pages.dev/" class="street-card" data-street="samora" target="_blank">
+                <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000" alt="Samora">
+                <div class="overlay"></div>
+                <span class="sub-text">Music / Events / Artists</span>
+                <h2>SAMORA MACHEL</h2>
+                <p>Sound. Energy. Nightlife.</p>
+            </a>
+            <a href="https://borrowdalerd.pages.dev/" class="street-card" data-street="borrowdale" target="_blank">
+                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000" alt="Borrowdale">
+                <div class="overlay"></div>
+                <span class="sub-text">Restaurants / Salons / Stores</span>
+                <h2>BORROWDALE RD</h2>
+                <p>Lifestyle. Premium.</p>
+            </a>
+            <a href="https://nelsonmandela.pages.dev/" class="street-card" data-street="nelson" target="_blank">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000" alt="Nelson">
+                <div class="overlay"></div>
+                <span class="sub-text">Stories / Culture</span>
+                <h2>NELSON MANDELA</h2>
+                <p>Voice. Meaning. Identity.</p>
+            </a>
+            <footer><p>ENTER HARARE &copy; 2026</p></footer>
+            <div class="powered-by"><p>Powered by warstreet experience model.</p></div>
+        </div>
     </div>
 
     <script>
-        // Scroll Reveal Logic
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 100;
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
-                }
+        /* --- TRACKING SYSTEM --- */
+        const Tracker = {
+            log(type, street = null) {
+                const logs = JSON.parse(localStorage.getItem('eh_logs') || '[]');
+                logs.push({ type, street, time: Date.now() });
+                localStorage.setItem('eh_logs', JSON.stringify(logs));
             }
+        };
+
+        const billboard = document.getElementById('billboard');
+        const energyDrop = document.getElementById('energy-drop');
+        const arrivalOverlay = document.getElementById('arrival-overlay');
+        const btnBack = document.getElementById('btn-back-gesture');
+        const streets = document.querySelectorAll('.street-card');
+        let backTimer = null;
+
+        /* --- ENTRY LOGIC --- */
+        async function triggerEntry() {
+            Tracker.log('entry_click');
+            billboard.classList.add('responding');
+            await new Promise(r => setTimeout(r, 350));
+            
+            energyDrop.classList.add('active');
+            await new Promise(r => setTimeout(r, 600));
+
+            // State Switch
+            document.body.classList.remove('state-billboard');
+            document.body.classList.add('state-streets');
+
+            // Arrival sequence
+            arrivalOverlay.classList.add('active');
+            arrivalOverlay.classList.add('animating');
+            
+            await new Promise(r => setTimeout(r, 1600)); // Hold
+            
+            // Handoff to streets
+            arrivalOverlay.classList.remove('active');
+            setTimeout(() => {
+                arrivalOverlay.classList.remove('animating');
+                streets.forEach(card => card.classList.add('activated'));
+            }, 600);
         }
 
-        window.addEventListener("scroll", reveal);
-        
-        // Trigger once on load
-        window.onload = reveal;
-    </script>
+        function triggerBack() {
+            document.body.classList.remove('state-streets', 'dimmed');
+            document.body.classList.add('state-billboard');
+            billboard.classList.remove('responding');
+            energyDrop.classList.remove('active');
+            streets.forEach(card => card.classList.remove('activated'));
+            btnBack.classList.remove('visible');
+        }
 
+        /* --- GESTURE LOGIC --- */
+        document.body.addEventListener('click', (e) => {
+            if (document.body.classList.contains('state-streets')) {
+                // If we didn't click a card (or link)
+                if (!e.target.closest('.street-card')) {
+                    showBackButton();
+                }
+            }
+        });
+
+        function showBackButton() {
+            btnBack.classList.add('visible');
+            document.body.classList.add('dimmed');
+            clearTimeout(backTimer);
+            backTimer = setTimeout(() => {
+                btnBack.classList.remove('visible');
+                document.body.classList.remove('dimmed');
+            }, 2500);
+        }
+
+        /* --- LISTENERS --- */
+        billboard.addEventListener('click', triggerEntry);
+        btnBack.addEventListener('click', (e) => {
+            e.stopPropagation();
+            triggerBack();
+        });
+
+        streets.forEach(card => {
+            card.addEventListener('click', () => Tracker.log('street_click', card.dataset.street));
+        });
+
+        setInterval(() => {
+            if (Math.random() > 0.85) {
+                billboard.classList.add('glitch-flash');
+                setTimeout(() => billboard.classList.remove('glitch-flash'), 80);
+            }
+        }, 12000);
+
+        /* --- OFFLINE CORE --- */
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'harare-v7';
+                self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/']))));
+                self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(res => res || fetch(e.request))));
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+    </script>
 </body>
-</html>
+</html>```
