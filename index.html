@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ENTER HARARE | Digital City Experience</title>
-    
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        /* --- CORE SYSTEM & STATE MACHINE --- */
         :root {
             --bg-deep: #050505;
             --bg-main: #0A0A0A;
@@ -21,414 +17,1177 @@
             --m-light: #9333EA;
         }
 
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             background-color: var(--bg-deep);
             color: var(--text);
             font-family: 'Inter', sans-serif;
-            line-height: 1.5;
-            user-select: none;
-            -webkit-user-select: none;
-            /* NO SCROLLING ALLOWED */
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            width: 100vw; height: 100vh;
         }
 
-        h1, h2 {
-            font-family: 'Antonio', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: -0.05em;
-        }
+        h1, h2 { font-family: 'Antonio', sans-serif; text-transform: uppercase; letter-spacing: -0.05em; }
 
-        /* --- STATE VISIBILITY CONTROL --- */
-        body.state-billboard .hero { opacity: 1; visibility: visible; pointer-events: auto; }
-        body.state-billboard .street-container { opacity: 0; visibility: hidden; pointer-events: none; }
-
-        body.state-streets .hero { opacity: 0; visibility: hidden; pointer-events: none; }
-        body.state-streets .street-container { opacity: 1; visibility: visible; pointer-events: auto; }
-
-        /* --- BILLBOARD LAYER: FOUNDATION --- */
-        .hero {
+        /* Grid Activation Layer */
+        #grid-layer {
             position: fixed;
             inset: 0;
+            background: #02040a;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
             overflow: hidden;
-            cursor: pointer;
-            z-index: 100;
-            background: var(--bg-deep);
-            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* --- AMBIENT LIGHT ENGINE --- */
-        .ambient-engine { position: absolute; inset: 0; z-index: 1; }
-        .light-field {
+        #grid-layer.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .grid-canvas {
             position: absolute;
-            width: 120vw; height: 120vh;
-            filter: blur(100px); opacity: 0.18;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center;
+            transition: opacity 1.5s ease;
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            height: 1px;
+            width: 0;
+            opacity: 0;
+        }
+
+        .node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #3b82f6;
             border-radius: 50%;
-            animation: drift 30s infinite alternate ease-in-out;
+            box-shadow: 0 0 10px #3b82f6;
+            opacity: 0;
+        }
+
+        .node-pulse {
+            animation: pulseNode 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseNode {
+            0%, 100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 10px #3b82f6; }
+            50% { transform: scale(3); opacity: 0.4; box-shadow: 0 0 20px #3b82f6; }
+        }
+
+        .signal-text-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .signal-line {
+            font-size: 10px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+
+        .signal-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .welcome-screen {
+            position: absolute;
+            z-index: 20;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .welcome-screen.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .welcome-screen h1 {
+            font-family: 'Antonio', sans-serif;
+            font-size: clamp(40px, 10vw, 80px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+            color: #fff;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+        }
+
+        .welcome-screen p {
+            font-size: 10px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            font-weight: 700;
+        }
+
+        .impact-flash {
+            position: absolute;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            z-index: 30;
             pointer-events: none;
         }
-        .field-1 { background: var(--p-light); top: -20%; left: -20%; animation-duration: 25s; }
-        .field-2 { background: var(--b-light); bottom: -20%; right: -20%; animation-duration: 35s; animation-delay: -5s; }
-        .field-3 { background: var(--m-light); top: 20%; left: 30%; width: 80vw; height: 80vh; animation-duration: 40s; }
 
-        @keyframes drift {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(5%, 10%) scale(1.1); }
+        @keyframes flashEffect {
+            0% { opacity: 0; }
+            10% { opacity: 0.4; }
+            100% { opacity: 0; }
         }
 
-        /* --- WORD CURTAIN --- */
+        .grid-impact .grid-canvas {
+            filter: brightness(3) saturate(2);
+            transition: filter 0.3s ease;
+        }
+
+        /* View Switching */
+        body.show-streets .hero { opacity: 0; pointer-events: none; visibility: hidden; }
+        body.show-streets .street-container { opacity: 1; pointer-events: all; visibility: visible; z-index: 30; }
+        body.show-streets #grid-layer { opacity: 0; pointer-events: none; visibility: hidden; }
+
+        .hero {
+            position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; z-index: 100;
+            background: radial-gradient(circle at 50% 50%, #0a0e1a 0%, #050505 100%);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.2, 0, 0, 1), filter 0.2s ease, background 0.2s ease;
+            cursor: pointer;
+            overflow: hidden;
+            will-change: transform, opacity, filter, background;
+            perspective: 1000px;
+        }
+
+        /* City Bg Layer */
+        .city-bg-layer {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 40px;
+            z-index: 5;
+            opacity: 0.18;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        .bg-street-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 12s infinite ease-in-out;
+            aspect-ratio: 4/5;
+        }
+
+        .bg-street-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .bg-street-card-label {
+            font-family: 'Antonio', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.2);
+            text-transform: uppercase;
+        }
+
+        .card-1 { animation-delay: 0s; transform: translateY(0); }
+        .card-2 { animation-delay: -2s; transform: translateY(-10px); }
+        .card-3 { animation-delay: -4s; transform: translateY(5px); }
+        .card-4 { animation-delay: -1s; transform: translateY(15px); }
+
+        /* Scanner System */
+        .scanner-beam {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
+            z-index: 6;
+            pointer-events: none;
+            animation: scan 10s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .bg-street-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .bg-street-card-glow {
+            animation: edgePulse 10s infinite linear;
+        }
+
+        .gold-accent::before {
+            background: radial-gradient(circle at top left, rgba(234, 179, 8, 0.15) 0%, transparent 70%) !important;
+        }
+
+        .gold-accent::after {
+            border: 1px solid rgba(234, 179, 8, 0.3) !important;
+        }
+
+        @keyframes edgePulse {
+            0%, 40%, 60%, 100% { opacity: 0; box-shadow: none; }
+            50% { opacity: 0.6; box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.2); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-8px) rotate(0.5deg); }
+            66% { transform: translateY(4px) rotate(-0.5deg); }
+        }
+
+        .hero.waking {
+            transform: scale(0.985);
+            filter: brightness(2) contrast(1.2) saturate(1.2);
+            background: radial-gradient(circle at 50% 50%, #2a3a5e 0%, #050505 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.03), transparent);
+            animation: breathe 12s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        .awaiting-entry {
+            font-size: 9px;
+            letter-spacing: 0.8em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 8px;
+            letter-spacing: 0.5em;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 5px;
+            height: 5px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: heartbeat 2s infinite ease-in-out;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.6); opacity: 0.3; }
+        }
+
+        .hero.waking .city-bg-layer {
+            transform: scale(1.05) translateZ(-50px);
+            opacity: 0.4;
+            filter: blur(0px);
+            transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translateY(-100%); opacity: 0; }
+            50% { transform: translateY(100%); opacity: 1; }
+        }
+
+        .ambient-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.6;
+            pointer-events: none;
+            transform: translateZ(0);
+        }
+
+        .hero h1 { 
+            font-size: clamp(48px, 12vw, 96px); 
+            line-height: 0.85; 
+            margin-bottom: 24px; 
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateZ(0);
+            background: linear-gradient(135deg, #fff 40%, rgba(59, 130, 246, 0.5) 50%, #fff 60%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textScan 6s infinite linear;
+        }
+
+        .gate-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 24px;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            box-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.1),
+                inset 0 -1px 1px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateZ(0);
+            width: calc(100% - 40px);
+            max-width: 450px;
+        }
+
+        @media (min-width: 768px) {
+            .gate-card {
+                padding: 60px 40px;
+                width: auto;
+            }
+        }
+
+        .gate-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+            animation: cardSweep 5s infinite linear;
+        }
+
+        .gate-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(59, 130, 246, 0.05), transparent 40%, transparent 60%, rgba(59, 130, 246, 0.1));
+            pointer-events: none;
+        }
+
+        @keyframes cardSweep {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .hero.waking .gate-card {
+            transform: scale(1.02);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 
+                0 40px 120px rgba(59, 130, 246, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes textScan {
+            0% { background-position: 150% 0; }
+            100% { background-position: -150% 0; }
+        }
+
+        .hero.waking h1 {
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
+            letter-spacing: -0.04em;
+            transform: scale(1.02) translateZ(0);
+        }
+
+        .system-status {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            text-align: right;
+            font-family: 'Inter', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            color: rgba(59, 130, 246, 0.4);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        #status-msg {
+            transition: opacity 0.5s ease;
+        }
+
+        .ambient-engine { position: absolute; inset: 0; z-index: 1; }
+        .light-field {
+            position: absolute; width: 120vw; height: 120vh; filter: blur(100px); opacity: 0.18; border-radius: 50%;
+            animation: drift 30s infinite alternate ease-in-out;
+        }
+        .field-1 { background: var(--p-light); top: -20%; left: -20%; }
+        .field-2 { background: var(--b-light); bottom: -20%; right: -20%; animation-delay: -5s; }
+
+        @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 10%) scale(1.1); } }
+
         .word-curtain {
-            position: absolute; inset: 0; z-index: 2;
-            display: flex; flex-direction: column; justify-content: space-around;
-            pointer-events: none; overflow: hidden; padding: 5vh 0;
+            position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column;
+            justify-content: space-around; pointer-events: none; opacity: 0.04;
         }
         .curtain-text {
-            font-family: 'Antonio', sans-serif; font-size: 15vw; font-weight: 700;
-            color: white; opacity: 0.04; white-space: nowrap; letter-spacing: 0.1em;
+            font-family: 'Antonio', sans-serif; font-size: 15vw; font-weight: 700; white-space: nowrap;
             animation: curtainDrift 50s infinite linear;
         }
-        .curtain-text:nth-child(2) { animation-duration: 70s; animation-direction: reverse; opacity: 0.03; }
-        .curtain-text:nth-child(3) { animation-duration: 40s; opacity: 0.05; }
+        @keyframes curtainDrift { from { transform: translateX(-20%); } to { transform: translateX(20%); } }
 
-        @keyframes curtainDrift {
-            from { transform: translateX(-20%); }
-            to { transform: translateX(20%); }
-        }
+        .hero-content { position: relative; z-index: 100; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4em; color: var(--gray); }
+        .branding { margin-top: 48px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; }
 
-        /* --- AUTHORITY HUD --- */
-        .authority-hud {
-            display: flex; gap: 24px; margin-bottom: 24px; opacity: 0.5;
-            font-size: 9px; letter-spacing: 0.4em; font-weight: 700;
-            text-transform: uppercase; animation: hudFlicker 4s infinite;
-        }
-        @keyframes hudFlicker { 0%, 95%, 100% { opacity: 0.5; } 96% { opacity: 0.2; } 97% { opacity: 0.8; } }
-
-        /* --- SIGNALS --- */
-        .signal-overlay {
-            position: absolute; inset: 0; z-index: 3; pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px; opacity: 0.3;
-        }
-        .directional-sweep {
-            position: absolute; top: -100%; left: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none;
-        }
-        .sweep-layer {
-            position: absolute; width: 100%; height: 40%;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
-            animation: downwardSignal 6s infinite ease-in;
-        }
-        @keyframes downwardSignal {
-            0% { transform: translateY(-100%); opacity: 0; }
-            30% { opacity: 1; }
-            100% { transform: translateY(300%); opacity: 0; }
-        }
-
-        /* --- TEXT SYSTEM --- */
-        .hero-content {
-            position: relative; z-index: 100;
-            animation: systemHeartbeat 10s infinite ease-in-out;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .hero h1 {
-            font-size: clamp(60px, 15vw, 120px); line-height: 0.85; margin-bottom: 16px; font-weight: 700;
-            animation: textBreath 5s infinite ease-in-out;
-            text-shadow: 0 0 30px rgba(255,255,255,0.1);
-        }
-        @keyframes textBreath {
-            0%, 100% { transform: scale(1); opacity: 0.95; }
-            50% { transform: scale(1.03); opacity: 1; }
-        }
-        @keyframes systemHeartbeat {
-            0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.1); }
-        }
-        .hero .sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4em; color: var(--gray); font-weight: 500; }
-        .hero .branding { margin-top: 48px; }
-        .hero .choose {
-            font-size: 11px; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700;
-            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px;
-        }
-
-        /* --- TRANSITION MOMENTS --- */
-        .energy-drop {
-            position: fixed; top: 0; left: 50%; width: 40px; height: 100vh;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), #fff, rgba(255,255,255,0.3), transparent);
-            box-shadow: 0 0 60px 10px rgba(255,255,255,0.2);
-            z-index: 9999; transform: translateX(-50%) translateY(-100%);
-            opacity: 0; pointer-events: none; filter: blur(8px);
-        }
-        .energy-drop.active { animation: cinematicBeam 0.9s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        @keyframes cinematicBeam {
-            0% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
-            20%, 80% { opacity: 1; }
-            100% { transform: translateX(-50%) translateY(100%); opacity: 0; }
-        }
-
-        .hero.responding { filter: brightness(1.3); }
-        .hero.responding .hero-content { transform: scale(1.03); }
-
-        /* Arrival Overlay */
-        #arrival-overlay {
-            position: fixed; inset: 0; z-index: 500;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; background: var(--bg-deep);
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-        #arrival-overlay.active { opacity: 1; }
-        #arrival-overlay h3 {
-            font-family: 'Antonio', sans-serif; font-size: 24px; letter-spacing: 0.5em;
-            text-transform: uppercase; margin-bottom: 8px;
-            transform: translateY(10px) scale(0.96); transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        #arrival-overlay p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gray); opacity: 0; transition: opacity 0.8s ease 0.2s; }
-        #arrival-overlay.animating h3 { transform: translateY(0) scale(1); animation: glowPulse 2s infinite ease-in-out; }
-        #arrival-overlay.animating p { opacity: 1; }
-        @keyframes glowPulse { 0%, 100% { text-shadow: 0 0 10px transparent; } 50% { text-shadow: 0 0 20px rgba(255,255,255,0.4); } }
-
-        /* --- STREET VIEW HEADER --- */
-        #system-header {
-            position: absolute; top: 40px; width: 100%; text-align: center;
-            opacity: 0; pointer-events: none; transition: opacity 1s ease 0.5s;
-            z-index: 10;
-        }
-        #system-header h4 { font-family: 'Antonio', sans-serif; font-size: 14px; letter-spacing: 0.6em; text-transform: uppercase; opacity: 0.8; }
-        #system-header span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em; color: var(--gray); }
-        body.state-streets #system-header { opacity: 1; }
-
-        /* --- GESTURE BACK CONTROL --- */
-        #btn-back-gesture {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
-            padding: 12px 24px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px); color: #fff; cursor: pointer;
-            opacity: 0; pointer-events: none; transition: all 0.4s ease;
-        }
-        #btn-back-gesture.visible { opacity: 1; pointer-events: auto; }
-        body.state-streets.dimmed #street-ui { filter: brightness(0.4); }
-
-        /* --- STREET LAYER: CONTENT --- */
         .street-container {
-            position: fixed; inset: 0; z-index: 20;
-            background: var(--bg-deep); transition: opacity 0.8s ease;
-            overflow-y: auto; overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
+            position: fixed; inset: 0; z-index: 20; background: var(--bg-deep);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; visibility: hidden;
+            transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
         }
-        .street-inner { max-width: 600px; margin: 0 auto; padding: 120px 16px 80px; }
+
+        body.show-streets .street-container {
+            opacity: 1;
+            pointer-events: all;
+            visibility: visible;
+        }
+
+        .street-grid {
+            position: relative; 
+            width: 100%; 
+            min-height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 24px 16px;
+            padding: 120px 20px 80px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            transition: all 0.5s ease;
+        }
+
+        @media (max-width: 380px) {
+            .street-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding-top: 100px;
+            }
+        }
+
+        /* Focus Behavior: Dim others when interacting */
+        .street-grid:hover .street-item:not(:hover) {
+            opacity: 0.4;
+            filter: grayscale(0.5) blur(2px);
+            transform: scale(0.98);
+        }
+
+        .street-item {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
         .street-card {
-            position: relative; width: 100%; height: 45vh; min-height: 320px;
-            margin-bottom: 16px; border-radius: var(--card-radius); overflow: hidden;
-            cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end;
-            padding: 32px; transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            text-decoration: none; color: white; opacity: 0; transform: translateY(40px);
+            position: relative;
+            width: 100%; 
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 16px;
+            text-decoration: none; color: white;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            background: rgba(40, 40, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            will-change: transform, box-shadow;
+            animation: cardFloat 8s infinite ease-in-out;
         }
-        .street-card.activated { opacity: 1; transform: translateY(0); }
-        .street-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 1.5s ease; }
-        .street-card .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%); z-index: -1; }
-        .street-card h2 { font-size: 42px; line-height: 1; margin-bottom: 8px; }
-        .street-card .sub-text { font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.7; margin-bottom: 8px; }
 
-        .street-card:nth-child(1) { transition-delay: 0.1s; }
-        .street-card:nth-child(2) { transition-delay: 0.2s; }
-        .street-card:nth-child(3) { transition-delay: 0.3s; }
-        .street-card:nth-child(4) { transition-delay: 0.4s; }
+        .street-label {
+            font-family: 'Antonio', sans-serif;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 900;
+            text-align: center;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
 
-        footer { padding: 40px 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
-        footer p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5em; color: #444; }
-        .powered-by { padding: 0 0 80px; text-align: center; }
-        .powered-by p { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #666; }
+        .street-item:hover .street-label {
+            color: #fff;
+            letter-spacing: 0.15em;
+        }
 
-        .glitch-flash { animation: flash 0.1s steps(2); }
-        @keyframes flash { 0% { filter: invert(0); } 50% { filter: invert(1) brightness(2); } }
+        .street-item:active .street-card {
+            transform: scale(1.05) translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px var(--glow);
+            border-color: #fff;
+        }
+
+        .street-item:active .street-label {
+            color: #fff;
+            transform: translateY(2px);
+        }
+
+        .street-card:nth-child(even) { animation-delay: -2s; }
+        .street-card:nth-child(3) { animation-delay: -4s; }
+        .street-card:nth-child(4) { animation-delay: -6s; }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-3px) rotate(0.5deg); }
+            66% { transform: translateY(2px) rotate(-0.5deg); }
+        }
+
+        .street-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: skewX(-20deg);
+            pointer-events: none;
+            animation: lightSweep 12s infinite linear;
+        }
+
+        @keyframes lightSweep {
+            0% { left: -150%; }
+            20%, 100% { left: 250%; }
+        }
+
+        .street-card img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -2; opacity: 0.75;
+            filter: brightness(1.1) contrast(1.05);
+            transition: transform 1.2s ease;
+        }
+
+        .street-card .overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+            z-index: -1;
+        }
+
+        .street-card p {
+            font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.8); font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .street-card.card-glow {
+            border-color: var(--glow);
+            box-shadow: 0 0 20px var(--glow-dim);
+            animation: cardFloat 8s infinite ease-in-out, glowBreathe 4s infinite ease-in-out;
+        }
+
+        /* Vibe Signatures */
+        .street-card.vibe-pulse { animation-duration: 8s, 2s; } /* Fast pulse for Samora */
+        .street-card.vibe-flow { animation-duration: 8s, 3s; } /* Smooth flow for Inez */
+        .street-card.vibe-calm { animation-duration: 8s, 6s; } /* Deep calm for Borrowdale */
+        .street-card.vibe-grounded { animation-duration: 8s, 5s; } /* Slow heavy for Mandela */
+
+        .street-card.featured-focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 25px var(--glow-dim);
+            filter: brightness(1.05);
+        }
+
+        .street-card.idle-vibe {
+            transform: scale(1.02) translateY(-4px);
+            box-shadow: 0 0 50px var(--glow-dim), 0 0 20px var(--glow-dim);
+            border-color: rgba(255, 255, 255, 0.6);
+            filter: brightness(1.2);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: cardFloat 8s infinite ease-in-out, idleActivePulse 6s infinite ease-in-out !important;
+            z-index: 50;
+        }
+
+        @keyframes idleActivePulse {
+            0%, 100% { 
+                box-shadow: 0 0 25px var(--glow-dim); 
+                border-color: rgba(255, 255, 255, 0.3);
+                transform: scale(1.02) translateY(-4px);
+            }
+            50% { 
+                box-shadow: 0 0 45px var(--glow), 0 0 20px var(--glow-dim); 
+                border-color: rgba(255, 255, 255, 0.8);
+                transform: scale(1.025) translateY(-5px);
+            }
+        }
+
+        @keyframes glowBreathe {
+            0%, 100% { 
+                box-shadow: 0 0 20px var(--glow-dim); 
+                border-color: var(--glow);
+                filter: brightness(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px var(--glow), 0 0 15px var(--glow-dim); 
+                border-color: rgba(255, 255, 255, 0.6);
+                filter: brightness(1.2);
+            }
+        }
+
+        .ambient-dots {
+            position: absolute; inset: 0; z-index: -1; pointer-events: none;
+        }
+        .dot {
+            position: absolute; background: #fff;
+            border-radius: 50%; opacity: 0;
+            will-change: transform, opacity;
+            animation: dotFloat linear infinite;
+        }
+        @keyframes dotFloat {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            20% { opacity: var(--dot-opacity, 0.2); }
+            80% { opacity: var(--dot-opacity, 0.2); }
+            100% { transform: translateY(-100vh) translateX(var(--drift-x, 40px)) rotate(var(--drift-r, 45deg)); opacity: 0; }
+        }
+
+        .system-header {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 40px 40px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            z-index: 3000; pointer-events: none;
+        }
+        .header-left { 
+            display: flex; 
+            flex-direction: column;
+            align-items: flex-start; 
+            gap: 4px; 
+        }
+        .header-harare {
+            font-family: 'Antonio', sans-serif; font-size: 14px; font-weight: 700;
+            letter-spacing: 0.15em; color: #fff; text-transform: uppercase;
+            line-height: 1;
+        }
+        .system-line {
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), transparent);
+            margin-top: 4px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        .zim-accent {
+            width: 12px; height: 1px; background: rgba(255, 255, 255, 0.3);
+            position: relative; overflow: hidden;
+            display: none; /* Substituted by system-line but keeping for structure if needed */
+        }
+        .zim-accent::after {
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 40%;
+            background: #e43d2b;
+        }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 8px; font-weight: 900; letter-spacing: 0.4em;
+            color: rgba(255, 255, 255, 0.4); text-transform: uppercase;
+        }
+        .status-dot {
+            width: 4px; height: 4px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            animation: heartbeat 2s infinite ease-in-out;
+        }
+
+        .interaction-hint {
+            position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%);
+            font-size: 8px; letter-spacing: 0.6em; text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5); font-weight: 400;
+            pointer-events: none; z-index: 50;
+            opacity: 0;
+            animation: signalTextBreathe 8s infinite ease-in-out;
+        }
+
+        .bottom-glow {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 140px;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.08), transparent);
+            pointer-events: none; z-index: 40;
+            opacity: 0;
+            animation: signalGlowBreathe 8s infinite ease-in-out;
+        }
+
+        .system-energy-line {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 1px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4), transparent 80%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            pointer-events: none; z-index: 45;
+            opacity: 0;
+            animation: signalGlowBreathe 8s infinite ease-in-out;
+        }
+
+        @keyframes signalGlowBreathe {
+            0%, 35%, 100% { opacity: 0; }
+            50%, 85% { opacity: 1; }
+        }
+
+        @keyframes signalTextBreathe {
+            0%, 50%, 100% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+            65%, 85% { opacity: 0.5; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Reactive state for tap */
+        .system-reactive .bottom-glow {
+            animation: none;
+            opacity: 0.8;
+            height: 160px;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.12), transparent);
+            transition: all 0.3s ease-out;
+        }
+        .system-reactive .system-energy-line {
+            animation: none;
+            opacity: 1;
+            width: 90%;
+            transition: all 0.3s ease-out;
+        }
+        .system-reactive .interaction-hint {
+            animation: none;
+            opacity: 0;
+        }
+
+        .energy-beam {
+            position: fixed; top: 0; left: 50%; width: 40px; height: 100vh;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            filter: blur(8px); z-index: 9999; transform: translateX(-50%) translateY(-100%);
+            pointer-events: none;
+        }
+        .beam-active { animation: beamDrop 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        @keyframes beamDrop { 0% { transform: translateX(-50%) translateY(-100%); } 100% { transform: translateX(-50%) translateY(100%); } }
     </style>
 </head>
-<body class="state-billboard" oncontextmenu="return false;">
+<body class="bg-[#050505] text-[#F5F5F5] font-sans">
+    <style>
+        #landing, #home {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .fade-in {
+            opacity: 0;
+            animation: fade-in-anim 0.5s forwards;
+        }
+        @keyframes fade-in-anim { to { opacity: 1; } }
+    </style>
 
-    <!-- Energy Drop Beam -->
-    <div id="energy-drop" class="energy-drop"></div>
+    <div id="landing">
+        <div id="grid-layer" class="">
+            <div class="grid-canvas"></div>
+            <div class="grid-lines" id="grid-lines"></div>
+            <div class="impact-flash" id="impact-flash"></div>
+            
+            <div class="signal-text-container" id="signal-container">
+                <p class="signal-line" id="sig-1">ACCESS GRANTED</p>
+                <p class="signal-line" id="sig-2">HARARE GRID ONLINE</p>
+                <p class="signal-line" id="sig-3">ENTERING LIVE DISTRICT</p>
+            </div>
 
-    <!-- Arrival Overlay -->
-    <div id="arrival-overlay">
-        <h3>Welcome to Harare</h3>
-        <p>Explore the streets</p>
+            <div class="welcome-screen" id="welcome-screen">
+                <h1 class="opacity-0 translate-y-4 transition-all duration-1000" id="welcome-title">WELCOME TO HARARE</h1>
+                <p class="text-white/40 text-[10px] uppercase tracking-[0.8em] font-black opacity-0 translate-y-2 transition-all duration-1000 delay-300" id="welcome-sub">ENJOY YOUR WALK</p>
+            </div>
+        </div>
+
+        <div id="energy-beam" class="energy-beam"></div>
+
+        <section class="hero" id="billboard-layer">
+            <div class="ambient-grid"></div>
+            <div class="city-bg-layer">
+                <div class="scanner-beam"></div>
+                <div class="bg-street-card card-1 bg-street-card-glow"><span class="bg-street-card-label">SAMORA MACHEL</span></div>
+                <div class="bg-street-card card-2 bg-street-card-glow"><span class="bg-street-card-label">INEZ TERRACE</span></div>
+                <div class="bg-street-card card-3 bg-street-card-glow gold-accent"><span class="bg-street-card-label">BORROWDALE RD</span></div>
+                <div class="bg-street-card card-4 bg-street-card-glow"><span class="bg-street-card-label">NELSON MANDELA</span></div>
+            </div>
+            <div class="ambient-engine">
+                <div class="light-field field-1"></div>
+                <div class="light-field field-2"></div>
+            </div>
+            <div class="word-curtain">
+                <div class="curtain-text">ACCESS SIGNAL HARARE DISTRICT LIVE ENTER</div>
+                <div class="curtain-text">ENTER LIVE DISTRICT HARARE SIGNAL ACCESS</div>
+            </div>
+            <div class="hero-content">
+                <div class="gate-card">
+                    <h1>ENTER <br> HARARE</h1>
+                    <p class="sub-label">A digital layer of the city</p>
+                    <div class="branding pt-16 flex flex-col items-center gap-2">
+                        <span class="awaiting-entry">«AWAITING ENTRY»</span>
+                        <div class="live-indicator">
+                            <div class="live-dot"></div>
+                            <span>LIVE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- Gesture Back Button -->
-    <div id="btn-back-gesture">Exit District</div>
+    <div id="home" style="display:none;">
+        <header class="system-header">
+            <div class="header-left">
+                <span class="header-harare">HARARE</span>
+                <div class="system-line"></div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    <span id="global-status">ACTIVE</span>
+                </div>
+            </div>
+        </header>
 
-    <!-- Billboard Layer -->
-    <section class="hero" id="billboard">
-        <div class="ambient-engine">
-            <div class="light-field field-1"></div>
-            <div class="light-field field-2"></div>
-            <div class="light-field field-3"></div>
-        </div>
-        <div class="word-curtain">
-            <div class="curtain-text">ACCESS SIGNAL HARARE DISTRICT LIVE ENTER</div>
-            <div class="curtain-text">ENTER LIVE DISTRICT HARARE SIGNAL ACCESS</div>
-            <div class="curtain-text">HARARE ACCESS SIGNAL ENTER DISTRICT LIVE</div>
-        </div>
-        <div class="signal-overlay"></div>
-        <div class="directional-sweep"><div class="sweep-layer"></div></div>
-        <div class="hero-content">
-            <div class="authority-hud"><span>SIGNAL: HARARE</span><span>STATUS: LIVE</span><span>ACCESS: OPEN</span></div>
-            <h1>ENTER <br> HARARE</h1>
-            <p class="sub-label">A digital layer of the city</p>
-            <div class="branding"><span class="choose">Choose your street</span></div>
-        </div>
-    </section>
-
-    <!-- Street Layer -->
-    <div class="street-container" id="street-ui">
-        <div id="system-header">
-            <h4>Harare</h4>
-            <span>Explore the streets</span>
-        </div>
-        <div class="street-inner">
-            <a href="https://inezterrace.pages.dev/" class="street-card" data-street="inez" target="_blank">
-                <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000" alt="Inez">
-                <div class="overlay"></div>
-                <span class="sub-text">Drops / What’s happening now</span>
-                <h2>INEZ TERRACE</h2>
-                <p>Access. Hustle. Movement.</p>
-            </a>
-            <a href="https://samoramachel.pages.dev/" class="street-card" data-street="samora" target="_blank">
-                <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000" alt="Samora">
-                <div class="overlay"></div>
-                <span class="sub-text">Music / Events / Artists</span>
-                <h2>SAMORA MACHEL</h2>
-                <p>Sound. Energy. Nightlife.</p>
-            </a>
-            <a href="https://borrowdalerd.pages.dev/" class="street-card" data-street="borrowdale" target="_blank">
-                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000" alt="Borrowdale">
-                <div class="overlay"></div>
-                <span class="sub-text">Restaurants / Salons / Stores</span>
-                <h2>BORROWDALE RD</h2>
-                <p>Lifestyle. Premium.</p>
-            </a>
-            <a href="https://nelsonmandela.pages.dev/" class="street-card" data-street="nelson" target="_blank">
-                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000" alt="Nelson">
-                <div class="overlay"></div>
-                <span class="sub-text">Stories / Culture</span>
-                <h2>NELSON MANDELA</h2>
-                <p>Voice. Meaning. Identity.</p>
-            </a>
-            <footer><p>ENTER HARARE &copy; 2026</p></footer>
-            <div class="powered-by"><p>Powered by warstreet experience model.</p></div>
+        <div class="street-container" id="street-layer">
+            <div class="ambient-dots" id="ambient-dots"></div>
+            <div class="street-grid" id="street-grid">
+                <!-- Dynamically injected cards -->
+            </div>
+            <div class="bottom-glow"></div>
+            <div class="system-energy-line"></div>
+            <div class="interaction-hint">TOUCH A STREET</div>
         </div>
     </div>
+
+    <!-- Unified Audio Component -->
 
     <script>
-        /* --- TRACKING SYSTEM --- */
-        const Tracker = {
-            log(type, street = null) {
-                const logs = JSON.parse(localStorage.getItem('eh_logs') || '[]');
-                logs.push({ type, street, time: Date.now() });
-                localStorage.setItem('eh_logs', JSON.stringify(logs));
+        // Global system reactivity
+        const triggerReaction = () => {
+            const streetLayer = document.getElementById('street-layer');
+            if (streetLayer) {
+                streetLayer.classList.add('system-reactive');
+                setTimeout(() => {
+                    streetLayer.classList.remove('system-reactive');
+                }, 600);
             }
         };
 
-        const billboard = document.getElementById('billboard');
-        const energyDrop = document.getElementById('energy-drop');
-        const arrivalOverlay = document.getElementById('arrival-overlay');
-        const btnBack = document.getElementById('btn-back-gesture');
-        const streets = document.querySelectorAll('.street-card');
-        let backTimer = null;
+        document.addEventListener('mousedown', triggerReaction);
+        document.addEventListener('touchstart', triggerReaction);
 
-        /* --- ENTRY LOGIC --- */
-        async function triggerEntry() {
-            Tracker.log('entry_click');
-            billboard.classList.add('responding');
-            await new Promise(r => setTimeout(r, 350));
-            
-            energyDrop.classList.add('active');
-            await new Promise(r => setTimeout(r, 600));
+        function trackEvent(name, val) {
+            console.log(`[Tracking] ${name}: ${val || ''}`);
+            const logs = JSON.parse(localStorage.getItem('eh_logs') || '[]');
+            logs.push({ name, val, time: Date.now() });
+            localStorage.setItem('eh_logs', JSON.stringify(logs.slice(-50)));
+        }
 
-            // State Switch
-            document.body.classList.remove('state-billboard');
-            document.body.classList.add('state-streets');
-
-            // Arrival sequence
-            arrivalOverlay.classList.add('active');
-            arrivalOverlay.classList.add('animating');
+        function enterSystem() {
+            const landing = document.getElementById('landing');
+            const home = document.getElementById('home');
             
-            await new Promise(r => setTimeout(r, 1600)); // Hold
+            landing.classList.add('fade-out');
+            document.body.classList.add("show-streets");
             
-            // Handoff to streets
-            arrivalOverlay.classList.remove('active');
             setTimeout(() => {
-                arrivalOverlay.classList.remove('animating');
-                streets.forEach(card => card.classList.add('activated'));
-            }, 600);
+                landing.style.display = 'none';
+                home.style.display = 'block';
+                home.classList.add('fade-in');
+                window.scrollTo(0, 0);
+                if (typeof DistrictSystem !== 'undefined' && !DistrictSystem.isInitialized) {
+                    DistrictSystem.init();
+                }
+            }, 500);
         }
 
-        function triggerBack() {
-            document.body.classList.remove('state-streets', 'dimmed');
-            document.body.classList.add('state-billboard');
-            billboard.classList.remove('responding');
-            energyDrop.classList.remove('active');
-            streets.forEach(card => card.classList.remove('activated'));
-            btnBack.classList.remove('visible');
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.location.hash === "#home") {
+                document.getElementById('landing').style.display = 'none';
+                document.getElementById('home').style.display = 'block';
+                document.body.classList.add("show-streets");
+                DistrictSystem.init();
+                // Clear hash so reload returns to landing
+                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            }
 
-        /* --- GESTURE LOGIC --- */
-        document.body.addEventListener('click', (e) => {
-            if (document.body.classList.contains('state-streets')) {
-                // If we didn't click a card (or link)
-                if (!e.target.closest('.street-card')) {
-                    showBackButton();
+            const billboard = document.getElementById("billboard-layer");
+            const gridLayer = document.getElementById("grid-layer");
+            const beam = document.getElementById("energy-beam");
+            const gridLinesContainer = document.getElementById("grid-lines");
+            const statusMsg = document.getElementById("global-status");
+
+            const statuses = ["ACTIVE", "LIVE", "STABLE", "SYNCED"];
+            let sIdx = 0;
+            setInterval(() => {
+                statusMsg.style.opacity = '0';
+                setTimeout(() => {
+                    sIdx = (sIdx + 1) % statuses.length;
+                    statusMsg.innerText = statuses[sIdx];
+                    statusMsg.style.opacity = '1';
+                }, 500);
+            }, 6000);
+
+            let activated = false;
+
+            // Generate some random lines and nodes for the grid
+            document.addEventListener('mousemove', (e) => {
+                if (activated) return;
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                const bgLayer = document.querySelector('.city-bg-layer');
+                if (bgLayer) {
+                    bgLayer.style.transform = `translate(${x}px, ${y}px)`;
+                }
+            });
+
+            function initGrid() {
+                for (let i = 0; i < 40; i++) {
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    line.style.top = Math.random() * 100 + '%';
+                    line.style.left = Math.random() * 100 + '%';
+                    line.style.transform = `rotate(${Math.random() > 0.5 ? 0 : 90}deg)`;
+                    line.style.opacity = '0.05';
+                    gridLinesContainer.appendChild(line);
+
+                    const node = document.createElement('div');
+                    node.className = 'node';
+                    node.style.top = Math.random() * 100 + '%';
+                    node.style.left = Math.random() * 100 + '%';
+                    node.style.opacity = (Math.random() * 0.1).toString();
+                    gridLinesContainer.appendChild(node);
                 }
             }
+            initGrid();
+
+            billboard.addEventListener("click", async () => {
+                if (activated) return;
+                activated = true;
+
+                trackEvent('enter_city');
+                
+                // Interaction Feedback (Wake Up)
+                billboard.classList.add('waking');
+                
+                await new Promise(r => setTimeout(r, 180)); // Micro-response delay
+
+                gridLayer.classList.add("active");
+                
+                // 1. Signal Text Sequence
+                const steps = ['sig-1', 'sig-2', 'sig-3'];
+                for (let i = 0; i < steps.length; i++) {
+                    await new Promise(r => setTimeout(r, 600));
+                    document.getElementById(steps[i]).classList.add('visible');
+                    
+                    // Animate some lines during signals
+                    const lines = gridLinesContainer.querySelectorAll('.line');
+                    for (let j = 0; j < 5; j++) {
+                        const l = lines[Math.floor(Math.random() * lines.length)];
+                        l.style.width = '200px';
+                        l.style.opacity = '0.8';
+                        l.style.transition = 'all 1s ease';
+                    }
+                }
+
+                // 2. Pulse all nodes
+                const nodes = gridLinesContainer.querySelectorAll('.node');
+                nodes.forEach(n => {
+                    n.style.opacity = '1';
+                    n.classList.add('node-pulse');
+                });
+
+                // 3. Energy Beam Effect
+                await new Promise(r => setTimeout(r, 800));
+                document.getElementById('signal-container').style.opacity = '0';
+                beam.classList.add('beam-active');
+                
+                // 4. Impact
+                await new Promise(r => setTimeout(r, 600));
+                gridLayer.classList.add('grid-impact');
+                document.getElementById('impact-flash').style.animation = 'flashEffect 0.5s ease-out';
+                
+                // 5. Welcome Message
+                document.getElementById('welcome-screen').classList.add('visible');
+                setTimeout(() => {
+                    const wt = document.getElementById('welcome-title');
+                    const ws = document.getElementById('welcome-sub');
+                    wt.style.opacity = '1';
+                    wt.style.transform = 'translateY(0)';
+                    ws.style.opacity = '1';
+                    ws.style.transform = 'translateY(0)';
+                }, 100);
+
+                // 6. Transition to City (Dissolving Grid)
+                setTimeout(() => {
+                    enterSystem();
+                }, 2800);
+            });
         });
 
-        function showBackButton() {
-            btnBack.classList.add('visible');
-            document.body.classList.add('dimmed');
-            clearTimeout(backTimer);
-            backTimer = setTimeout(() => {
-                btnBack.classList.remove('visible');
-                document.body.classList.remove('dimmed');
-            }, 2500);
-        }
+        const DistrictSystem = {
+            isInitialized: false,
+            streets: [
+                { id: 'samora', name: 'SAMORA MACHEL', sub: 'Sound • Energy • Nightlife', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=1000', url: 'samora.html', color: 'rgba(147, 51, 234, 0.4)', vibe: 'vibe-pulse' },
+                { id: 'inez', name: 'INEZ TERRACE', sub: 'Access • Hustle • Movement', img: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000', url: 'inez.html', color: 'rgba(59, 130, 246, 0.4)', vibe: 'vibe-flow' },
+                { id: 'borrowdale', name: 'BORROWDALE RD', sub: 'Lifestyle • Premium', img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1000', url: 'borrowdale.html', color: 'rgba(234, 179, 8, 0.4)', vibe: 'vibe-calm' },
+                { id: 'mandela', name: 'NELSON MANDELA', sub: 'Voice • Meaning • Identity', img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000', url: 'mandela.html', color: 'rgba(255, 255, 255, 0.4)', vibe: 'vibe-grounded' }
+            ],
+            
+            init() {
+                if (this.isInitialized) return;
+                this.isInitialized = true;
+                this.container = document.getElementById('street-grid');
+                this.initDots();
+                this.render();
+                this.initInactivity();
+            },
 
-        /* --- LISTENERS --- */
-        billboard.addEventListener('click', triggerEntry);
-        btnBack.addEventListener('click', (e) => {
-            e.stopPropagation();
-            triggerBack();
-        });
+            initInactivity() {
+                let timer;
+                let lastIndex = -1;
+                const reset = () => {
+                    clearTimeout(timer);
+                    const cards = document.querySelectorAll('.street-card');
+                    cards.forEach(c => c.classList.remove('idle-vibe'));
+                    timer = setTimeout(() => {
+                        const cards = document.querySelectorAll('.street-card');
+                        if (cards.length === 0) return;
+                        
+                        let nextIndex;
+                        do {
+                            nextIndex = Math.floor(Math.random() * cards.length);
+                        } while (nextIndex === lastIndex && cards.length > 1);
+                        
+                        lastIndex = nextIndex;
+                        cards[nextIndex].classList.add('idle-vibe');
+                    }, 4000);
+                };
+                window.addEventListener('mousemove', reset);
+                window.addEventListener('touchstart', reset);
+                window.addEventListener('click', reset);
+                window.addEventListener('scroll', reset);
+                window.addEventListener('keydown', reset);
+                reset();
+            },
 
-        streets.forEach(card => {
-            card.addEventListener('click', () => Tracker.log('street_click', card.dataset.street));
-        });
+            initDots() {
+                const dotContainer = document.getElementById('ambient-dots');
+                if (!dotContainer) return;
+                for (let i = 0; i < 60; i++) {
+                    const dot = document.createElement('div');
+                    const size = Math.random() > 0.9 ? (2 + Math.random() * 3) : (1 + Math.random() * 1.5);
+                    const duration = 25 + Math.random() * 45;
+                    const blur = Math.random() > 0.7 ? (Math.random() * 2) : 0;
+                    const opacity = 0.05 + Math.random() * 0.15;
+                    const driftX = (Math.random() - 0.5) * 100;
+                    const driftR = (Math.random() - 0.5) * 90;
+                    
+                    dot.className = 'dot';
+                    dot.style.width = size + 'px';
+                    dot.style.height = size + 'px';
+                    dot.style.left = Math.random() * 100 + '%';
+                    dot.style.top = (100 + Math.random() * 10) + '%';
+                    dot.style.animationDelay = Math.random() * -duration + 's';
+                    dot.style.animationDuration = duration + 's';
+                    dot.style.filter = `blur(${blur}px)`;
+                    dot.style.setProperty('--dot-opacity', opacity);
+                    dot.style.setProperty('--drift-x', `${driftX}px`);
+                    dot.style.setProperty('--drift-r', `${driftR}deg`);
+                    
+                    dotContainer.appendChild(dot);
+                }
+            },
 
-        setInterval(() => {
-            if (Math.random() > 0.85) {
-                billboard.classList.add('glitch-flash');
-                setTimeout(() => billboard.classList.remove('glitch-flash'), 80);
+            render() {
+                this.container.innerHTML = '';
+                this.streets.forEach((s, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'street-item';
+
+                    const card = document.createElement('div');
+                    const isFeatured = i === 0; // Natural focus on Samora
+                    card.className = `street-card card-glow ${s.vibe} ${isFeatured ? 'featured-focus' : ''}`;
+                    card.style.setProperty('--glow', s.color);
+                    card.style.setProperty('--glow-dim', s.color.replace('0.4', isFeatured ? '0.2' : '0.12'));
+                    
+                    // Ambient Variation
+                    card.style.animationDelay = `${(Math.random() * -10).toFixed(2)}s, ${(Math.random() * -5).toFixed(2)}s`;
+
+                    card.innerHTML = `
+                        <img src="${s.img}" alt="${s.name}">
+                        <div class="overlay"></div>
+                        <div class="relative z-10 w-full">
+                            <p>${s.sub}</p>
+                        </div>
+                    `;
+
+                    const label = document.createElement('div');
+                    label.className = 'street-label';
+                    label.innerText = s.name;
+
+                    item.onclick = () => {
+                        trackEvent('enter_street', s.id);
+                        window.location.href = s.url;
+                    };
+
+                    item.appendChild(card);
+                    item.appendChild(label);
+                    this.container.appendChild(item);
+                });
             }
-        }, 12000);
+        };
 
-        /* --- OFFLINE CORE --- */
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'harare-v7';
-                self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/']))));
-                self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(res => res || fetch(e.request))));
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
-        }
+        // Shared Audio Controller Logic (Universal across files)
+        const AudioSys = {
+            audio: document.getElementById('main-audio'),
+            play(id, src) {
+                if (!this.audio) return;
+                if (this.audio.dataset.current === id) {
+                    this.audio.paused ? this.audio.play() : this.audio.pause();
+                } else {
+                    this.audio.src = src;
+                    this.audio.onerror = () => console.warn(`[Audio Sys] Failed: ${src}`);
+                    this.audio.play().catch(e => console.log("User interaction required"));
+                    this.audio.dataset.current = id;
+                }
+            }
+        };
     </script>
 </body>
-</html>```
+</html>

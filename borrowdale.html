@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrowdale Road | Premium Layer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #3B0F14;
+            --bg-surface: #5A1E26;
+            --energy-violet: #4B1F6F;
+            --accent-gold: #C6A86B;
+            --anton: 'Antonio', sans-serif;
+            --inter: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--accent-gold);
+            font-family: var(--inter);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.8s ease;
+        }
+
+        .dimmed body {
+            background-color: #1a0709;
+        }
+
+        .font-anton { font-family: var(--anton); }
+
+        /* Living Background System */
+        .bg-system {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(180deg, 
+                #1F070A 0%, 
+                #3B0F14 50%, 
+                #0F0405 100%
+            );
+            overflow: hidden;
+        }
+
+        .bg-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.5) 100%);
+            pointer-events: none;
+            mix-blend-mode: multiply;
+        }
+
+        .bg-light {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70vh;
+            background: radial-gradient(ellipse at 50% 0%, rgba(198, 168, 107, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .bg-energy {
+            position: absolute;
+            inset: -50%;
+            background: 
+                radial-gradient(circle at 30% 20%, var(--energy-violet) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, var(--energy-violet) 0%, transparent 40%);
+            opacity: 0.04;
+            filter: blur(120px);
+            animation: energy-drift 120s infinite linear;
+        }
+
+        @keyframes energy-drift {
+            0% { transform: rotate(0deg) translate(0, 0); }
+            50% { transform: rotate(180deg) translate(-5%, -5%); }
+            100% { transform: rotate(360deg) translate(0, 0); }
+        }
+
+        .bg-grain {
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+        }
+
+        .bg-aurora {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--ax, 50%) var(--ay, 50%), var(--accent-gold) 0%, transparent 30%);
+            opacity: 0;
+            filter: blur(60px);
+            animation: aurora-flicker 20s infinite;
+        }
+
+        @keyframes aurora-flicker {
+            0%, 15%, 25%, 100% { opacity: 0; }
+            20% { opacity: 0.03; }
+        }
+
+        /* Live Billboard Installation */
+        .billboard-container {
+            position: relative;
+            background: transparent;
+            border-radius: 2rem;
+            padding: 1px;
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+        }
+
+        /* Halo Effect Behind Cards */
+        .premium-card::before, .billboard-container::before {
+            content: '';
+            position: absolute;
+            inset: -60px;
+            background: radial-gradient(circle at center, rgba(147, 51, 234, 0.12) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+
+        .premium-card:hover::before {
+            opacity: 1;
+            background: radial-gradient(circle at center, rgba(147, 51, 234, 0.2) 0%, transparent 70%);
+        }
+
+        /* Surface Matrix Mesh */
+        .billboard-mesh {
+            position: absolute;
+            inset: 0;
+            z-index: 7;
+            pointer-events: none;
+            opacity: 0.08;
+            background-image: radial-gradient(circle, rgba(198, 168, 107, 0.2) 0.5px, transparent 0.5px);
+            background-size: 3px 3px;
+        }
+
+        .billboard-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .billboard-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--energy-violet), transparent 60%);
+            opacity: 0.12; /* More subtle mouse reaction */
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Signal Overlay */
+        .billboard-signals {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 49%,
+                rgba(198, 168, 107, 0.01) 50%,
+                transparent 51%
+            );
+            background-size: 100% 8px; /* Spaced out further */
+            animation: signal-move 20s infinite linear; /* Slower */
+        }
+
+        @keyframes signal-move {
+            from { background-position: 0 0; }
+            to { background-position: 0 100px; }
+        }
+
+        /* Internal Glow Layer */
+        .billboard-inner-glow {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            background: radial-gradient(circle at center, rgba(75, 31, 111, 0.08), transparent 80%);
+        }
+
+        /* Animated Perimeter */
+        .billboard-edge {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(198, 168, 107, 0.15);
+            border-radius: 2rem;
+            z-index: 10;
+            pointer-events: none;
+            mask-image: linear-gradient(var(--angle, 0deg), black, transparent 20%); /* Sharper highlight */
+            animation: rotateAngle 12s linear infinite; /* Slower rotation */
+        }
+
+        @keyframes rotateAngle {
+            0% { --angle: 0deg; }
+            100% { --angle: 360deg; }
+        }
+
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        .billboard-inner {
+            background: #000;
+            border-radius: calc(2rem - 1px);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+            min-height: 500px;
+        }
+
+        .billboard-image-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background-image: 
+                linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%),
+                url("https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/borrowdale/billboard.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: brightness(0.7) contrast(1.1);
+            animation: billboard-zoom 40s infinite alternate ease-in-out;
+        }
+
+        @keyframes billboard-zoom {
+            0% { transform: scale(1.05) translate(0, 0); }
+            100% { transform: scale(1.15) translate(-1%, -1%); }
+        }
+
+        .billboard-text-layer {
+            position: relative;
+            z-index: 10;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            animation: billboard-float 6s infinite ease-in-out;
+        }
+
+        @keyframes billboard-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes billboard-entrance {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phased-text {
+            opacity: 0;
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .phased-text.active {
+            opacity: 1;
+            animation: billboard-entrance 1.2s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .phased-text h2 {
+            font-size: clamp(3rem, 15vw, 10rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+        }
+
+        @keyframes text-breathing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+
+        /* Buttons & Cards */
+        .premium-card {
+            background: rgba(15, 4, 5, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(198, 168, 107, 0.1);
+            border-radius: 2rem;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .premium-card:hover {
+            border-color: rgba(198, 168, 107, 0.4);
+            transform: translateY(-4px);
+            background: rgba(15, 4, 5, 0.6);
+        }
+
+        @keyframes scan-sweep {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+        }
+
+        @keyframes card-pulse {
+            0% { transform: scale(0.85); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.85); opacity: 0.6; }
+        }
+
+        @keyframes subtleMove {
+            0% { transform: scale(1) translateY(0) translateX(0); }
+            100% { transform: scale(1.08) translateY(-8px) translateX(-4px); }
+        }
+
+        .live-dot {
+            width: 5px;
+            height: 5px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: card-pulse 2s infinite ease-in-out;
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+        }
+
+        .shakim-sweep {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(198, 168, 107, 0.08), transparent);
+            width: 50%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            animation: scan-sweep 8s infinite linear;
+        }
+
+        .btn-gold {
+            background: linear-gradient(180deg, #D4B982 0%, var(--accent-gold) 100%);
+            color: #1A0709; /* Deep, high-contrast dark maroon for text */
+            padding: 18px 40px;
+            border-radius: 0.5rem; /* Sharper radius */
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(198, 168, 107, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 30px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(198, 168, 107, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            background: linear-gradient(180deg, #E2C992 0%, #D4B982 100%);
+        }
+
+        .btn-gold:active {
+            transform: scale(0.97);
+            box-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline-gold {
+            border: 1px solid rgba(198, 168, 107, 0.3);
+            color: var(--accent-gold);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-gold:hover {
+            background: rgba(198, 168, 107, 0.1);
+            border-color: var(--accent-gold);
+        }
+
+
+        .back-link {
+            color: var(--accent-gold);
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        /* Locked State */
+        .billboard-container.locked {
+            transform: scale(0.98);
+            box-shadow: 0 0 100px rgba(75, 31, 111, 0.3);
+        }
+
+        .billboard-container.locked::before {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-system">
+        <div class="bg-light"></div>
+        <div class="bg-vignette"></div>
+        <div class="bg-energy"></div>
+        <div class="bg-grain"></div>
+    </div>
+
+    <header class="pt-20 pb-12 md:pt-40 md:pb-24 px-6 md:px-20 flex flex-col md:flex-row items-start md:items-end justify-between border-b border-white/5 mx-4 md:mx-12 gap-8 md:gap-0">
+        <div class="flex items-start md:items-end gap-6 md:gap-16">
+            <a href="javascript:goHome()" class="back-link !opacity-100 mb-1 md:mb-6">
+                <i data-lucide="arrow-left" class="w-8 h-8 md:w-10 md:h-10 stroke-[1.5]"></i>
+            </a>
+            <div class="space-y-3 md:space-y-4">
+                <h1 class="text-2xl md:text-5xl font-anton uppercase tracking-[0.2em] md:tracking-[0.25em] leading-none text-accent-gold drop-shadow-[0_0_30px_rgba(198,168,107,0.4)]">Borrowdale Road</h1>
+                <span class="block text-[9px] md:text-[11px] font-black uppercase tracking-[0.6em] md:tracking-[0.8em] opacity-40">System Node: Restricted Access</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 md:gap-6 mb-1 md:mb-5">
+            <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-accent-gold rounded-full animate-pulse shadow-[0_0_12px_rgba(198,168,107,0.8)]"></div>
+            <span class="text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-accent-gold opacity-80">Live Signal</span>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-8 py-24 md:py-40 space-y-48 md:space-y-64">
+        
+        <!-- HERO: LIVE INSTALLATION BILLBOARD -->
+        <section>
+            <div id="billboard" class="billboard-container">
+                <div class="billboard-edge"></div>
+                <div class="billboard-inner">
+                    <!-- Background Image Layer -->
+                    <div class="billboard-image-layer"></div>
+                    
+                    <div class="billboard-glow-edge"></div>
+                    <!-- Live System Layers -->
+                    <div class="billboard-signals"></div>
+                    <div class="billboard-mesh"></div>
+                    
+                    <div class="w-full billboard-text-layer">
+                        <div class="p-8 md:p-32 min-h-[500px] md:min-h-[600px] flex flex-col justify-center items-center relative text-center">
+                            <div class="h-48 md:h-64 relative w-full flex items-center justify-center">
+                                <div id="phase-1" class="phased-text active flex-col items-center justify-center">
+                                    <h2 class="font-anton uppercase text-accent-gold drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                                        Positioned.
+                                    </h2>
+                                    <p class="text-[9px] md:text-[11px] opacity-70 tracking-[0.6em] md:tracking-[0.8em] uppercase font-black mt-6 md:mt-8 text-accent-gold">Harare • Private Layer</p>
+                                </div>
+                                <div id="phase-2" class="phased-text flex-col items-center justify-center">
+                                    <h2 class="font-anton uppercase text-accent-gold drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                                        Positioned.
+                                    </h2>
+                                    <p class="text-[9px] md:text-[11px] opacity-70 tracking-[0.6em] md:tracking-[0.8em] uppercase font-black mt-6 md:mt-8 text-accent-gold">Harare • Private Layer</p>
+                                </div>
+                                <div id="phase-loading" class="phased-text flex-col items-center justify-center">
+                                    <h2 class="text-3xl md:text-5xl font-anton uppercase leading-none text-white tracking-[0.3em] opacity-80">Accessing...</h2>
+                                </div>
+                            </div>
+                            <div class="pt-8 text-center group w-full">
+                                <button onclick="openExperience()" id="exp-btn" class="btn-gold relative z-10 transition-all duration-500 hover:shadow-[0_15px_40px_-5px_rgba(198,168,107,0.3)]">
+                                    Enter System
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DIRECTORY: Curated Services -->
+        <section class="space-y-24">
+            <div class="text-center space-y-6">
+                <span class="text-[8px] font-black uppercase tracking-[0.6em] opacity-20">Curated Directory</span>
+                <h2 class="text-5xl font-anton uppercase tracking-tight">Active Services</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                <!-- Service 1: Shakim Beauty Bar -->
+                <div class="premium-card relative overflow-hidden flex flex-col justify-end min-h-[480px] p-8 md:p-12 group">
+                    <!-- Live Indicator Area -->
+                    <div class="absolute top-8 left-10 z-20 flex items-center gap-2.5 pointer-events-none">
+                        <div class="live-dot"></div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-accent-gold opacity-60">Harare CBD • Live</span>
+                    </div>
+
+                    <!-- Background Image Layer -->
+                    <div class="absolute inset-0 z-0">
+                        <img src="https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/borrowdale/shakim.jpg" 
+                             alt="Shakim Beauty Bar" 
+                             class="w-full h-full object-cover brightness-[0.7] contrast-[1.1] saturate-[1.1] group-hover:scale-110 transition-transform duration-[10s] ease-in-out"
+                             style="animation: subtleMove 15s ease-in-out infinite alternate;">
+                        
+                        <!-- Light Sweep Layer -->
+                        <div class="shakim-sweep"></div>
+
+                        <!-- Gradient Overlay For Readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0F0405] via-transparent to-transparent"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 space-y-8">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-4xl font-anton uppercase leading-none tracking-tight">Shakim <br> Beauty Bar</h3>
+                                <button onclick="window.location.href='tel:+263733391316'" class="w-11 h-11 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20 hover:bg-accent-gold/30 transition-all duration-300">
+                                    <i data-lucide="phone" class="w-4 h-4 text-accent-gold"></i>
+                                </button>
+                            </div>
+                            <p class="text-[12px] font-black uppercase tracking-[0.4em] text-accent-gold opacity-90">Makeup & Hair Installation</p>
+                            <div class="text-[10px] text-accent-gold/75 tracking-[0.2em] font-bold mt-[6px] mb-[12px] uppercase">4.9 • Verified</div>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="window.open('https://wa.me/263733391316?text=Hello%20Shakim%20Beauty%20Bar%2C%20I%E2%80%99m%20contacting%20you%20from%20LLH%20Samora%20Machel.%20I%E2%80%99d%20like%20to%20book%20a%20makeup%20%26%20hair%20installation.%20Please%20assist.', '_blank')" class="btn-gold !py-4 !px-10 !text-[10px] w-full">
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 2: KABz Barbershop -->
+                <div class="premium-card relative overflow-hidden flex flex-col justify-end min-h-[480px] p-8 md:p-12 group">
+                    <!-- Live Indicator Area -->
+                    <div class="absolute top-8 left-10 z-20 flex items-center gap-2.5 pointer-events-none">
+                        <div class="live-dot"></div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-accent-gold opacity-60">Borrowdale • Live</span>
+                    </div>
+
+                    <!-- Background Image Layer -->
+                    <div class="absolute inset-0 z-0">
+                        <img src="https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/borrowdale/kabz.jpg" 
+                             alt="KABz Barbershop" 
+                             class="w-full h-full object-cover brightness-[0.7] contrast-[1.1] saturate-[1.1] group-hover:scale-110 transition-transform duration-[10s] ease-in-out"
+                             style="animation: subtleMove 18s ease-in-out infinite alternate-reverse;">
+                        
+                        <!-- Light Sweep Layer -->
+                        <div class="shakim-sweep"></div>
+
+                        <!-- Gradient Overlay For Readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0F0405] via-transparent to-transparent"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 space-y-8">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-4xl font-anton uppercase leading-none tracking-tight">KABz <br> Barbershop</h3>
+                                <button onclick="window.location.href='tel:+263711953943'" class="w-11 h-11 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20 hover:bg-accent-gold/30 transition-all duration-300">
+                                    <i data-lucide="phone" class="w-4 h-4 text-accent-gold"></i>
+                                </button>
+                            </div>
+                            <p class="text-[12px] font-black uppercase tracking-[0.4em] text-accent-gold opacity-90">Precision grooming & clean finishes</p>
+                            <div class="text-[10px] text-accent-gold/75 tracking-[0.2em] font-bold mt-[6px] mb-[12px] uppercase">4.7 • Verified</div>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="window.open('https://wa.me/263711953943?text=Hello%20KABz%20Barbershop%2C%20I%E2%80%99m%20contacting%20you%20from%20LLH%20Borrowdale.%20I%E2%80%99d%20like%20to%20book%20a%20barber%20slot.%20Please%20assist.', '_blank')" class="btn-gold !py-4 !px-10 !text-[10px] w-full">
+                                Reserve Slot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 3: Janvic Creations -->
+                <div class="premium-card relative overflow-hidden flex flex-col justify-end min-h-[480px] p-8 md:p-12 group">
+                    <!-- Live Indicator Area -->
+                    <div class="absolute top-8 left-10 z-20 flex items-center gap-2.5 pointer-events-none">
+                        <div class="live-dot"></div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-black opacity-100">Harare • Live</span>
+                    </div>
+
+                    <!-- Background Image Layer -->
+                    <div class="absolute inset-0 z-0">
+                        <img src="https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/borrowdale/Janvic.jpg" 
+                             alt="Janvic Creations" 
+                             class="w-full h-full object-cover brightness-[0.7] contrast-[1.1] saturate-[1.1] group-hover:scale-110 transition-transform duration-[10s] ease-in-out"
+                             style="animation: subtleMove 14s ease-in-out infinite alternate;">
+                        
+                        <!-- Light Sweep Layer -->
+                        <div class="shakim-sweep"></div>
+
+                        <!-- Gradient Overlay For Readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0F0405] via-transparent to-transparent"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 space-y-8">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-4xl font-anton uppercase leading-none tracking-tight text-black">Janvic <br> Creations</h3>
+                                <button onclick="window.location.href='tel:+263777898227'" class="w-11 h-11 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20 hover:bg-accent-gold/30 transition-all duration-300">
+                                    <i data-lucide="phone" class="w-4 h-4 text-accent-gold"></i>
+                                </button>
+                            </div>
+                            <p class="text-[12px] font-black uppercase tracking-[0.4em] text-black opacity-100">High-end photography for events, brands, and personal sessions</p>
+                            <div class="text-[10px] text-black tracking-[0.2em] font-bold mt-[6px] mb-[12px] uppercase">4.8 • Verified</div>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="window.open('https://wa.me/263777898227?text=Hello%20Janvic%20Creations%2C%20I%E2%80%99m%20contacting%20you%20from%20LLH%20Borrowdale.%20I%E2%80%99d%20like%20to%20book%20a%20photography%20session.%20Please%20assist.', '_blank')" class="btn-gold !py-4 !px-10 !text-[10px] w-full">
+                                Book Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 4: CityView Guest House -->
+                <div class="premium-card relative overflow-hidden flex flex-col justify-end min-h-[480px] p-8 md:p-12 group">
+                    <!-- Live Indicator Area -->
+                    <div class="absolute top-8 left-10 z-20 flex items-center gap-2.5 pointer-events-none">
+                        <div class="live-dot"></div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-white opacity-100">Harare • Live</span>
+                    </div>
+
+                    <!-- Background Image Layer -->
+                    <div class="absolute inset-0 z-0">
+                        <img src="https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/borrowdale/cityview.jpg" 
+                             alt="CityView Guest House" 
+                             class="w-full h-full object-cover brightness-[0.7] contrast-[1.1] saturate-[1.1] group-hover:scale-110 transition-transform duration-[10s] ease-in-out"
+                             style="animation: subtleMove 20s ease-in-out infinite alternate;">
+                        
+                        <!-- Light Sweep Layer -->
+                        <div class="shakim-sweep"></div>
+
+                        <!-- Gradient Overlay For Readability -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0F0405] via-transparent to-transparent"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 space-y-8">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-4xl font-anton uppercase leading-none tracking-tight text-white">CityView <br> Guest House</h3>
+                                <button onclick="window.location.href='tel:+263776069308'" class="w-11 h-11 rounded-full bg-accent-gold/10 flex items-center justify-center border border-accent-gold/20 hover:bg-accent-gold/30 transition-all duration-300">
+                                    <i data-lucide="phone" class="w-4 h-4 text-accent-gold"></i>
+                                </button>
+                            </div>
+                            <p class="text-[12px] font-black uppercase tracking-[0.4em] text-white opacity-100">Comfortable premium accommodation in the heart of Harare</p>
+                            <div class="text-[10px] text-white tracking-[0.2em] font-bold mt-[6px] mb-[12px] uppercase">4.6 • Verified</div>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="window.open('https://wa.me/263776069308?text=Hello%20CityView%20Guest%20House%2C%20I%E2%80%99m%20contacting%20you%20from%20LLH%20Borrowdale.%20I%E2%80%99d%20like%20to%20check%20availability%20for%20a%20stay.%20Please%20assist.', '_blank')" class="btn-gold !py-4 !px-10 !text-[10px] w-full">
+                                Check Availability
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: Get Featured -->
+        <section class="max-w-3xl mx-auto py-20 pb-40">
+            <div class="premium-card p-16 md:p-24 text-center space-y-12 bg-black/20 border-white/5 shadow-none group">
+                <div class="space-y-8">
+                    <div class="space-y-4">
+                        <span class="text-[8px] font-black uppercase tracking-[0.6em] opacity-20">Placement Request</span>
+                        <h2 class="text-5xl font-anton uppercase leading-[0.9] transition-transform duration-700 group-hover:scale-[1.02]">Place Your Business in <br> Borrowdale Road</h2>
+                    </div>
+                    <p class="text-[13px] opacity-30 font-light leading-relaxed max-w-sm mx-auto">
+                        Limited placements available. Selected businesses are featured based on quality, presentation, and fit.
+                    </p>
+                </div>
+                <div class="pt-4">
+                    <button onclick="requestPlacement()" class="btn-gold">Request Placement</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="p-20 text-center border-t border-white/10 opacity-40">
+        <p class="text-[9px] font-black uppercase tracking-[0.6em]">Borrowdale Road • Premium Layer</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        function goHome() {
+            window.location.href = "index.html#home";
+        }
+
+        // Phased Text System
+        let currentPhase = 1;
+        const phases = ['phase-1', 'phase-2'];
+        
+        setInterval(() => {
+            const currentEl = document.getElementById(phases[currentPhase - 1]);
+            currentPhase = currentPhase === 1 ? 2 : 1;
+            const nextEl = document.getElementById(phases[currentPhase - 1]);
+            
+            if (document.getElementById('phase-loading').classList.contains('active')) return;
+
+            currentEl.classList.remove('active');
+            setTimeout(() => {
+                nextEl.classList.add('active');
+            }, 600);
+        }, 5000);
+
+        function openExperience() {
+            const billboard = document.getElementById('billboard');
+            const btn = document.getElementById('exp-btn');
+            const p1 = document.getElementById('phase-1');
+            const p2 = document.getElementById('phase-2');
+            const pl = document.getElementById('phase-loading');
+
+            document.documentElement.classList.add('dimmed');
+            billboard.classList.add('locked');
+            btn.style.opacity = '0';
+            btn.style.pointerEvents = 'none';
+
+            p1.classList.remove('active');
+            p2.classList.remove('active');
+            
+            setTimeout(() => {
+                pl.classList.add('active');
+            }, 300);
+
+            setTimeout(() => {
+                window.open('https://warstreetmobilebillboards.pages.dev/?mode=universal', '_blank');
+                
+                // Reset state after a while in case they come back
+                setTimeout(() => {
+                    document.documentElement.classList.remove('dimmed');
+                    billboard.classList.remove('locked');
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    pl.classList.remove('active');
+                    document.getElementById('phase-1').classList.add('active');
+                }, 2000);
+            }, 800);
+        }
+
+        function requestAction(service) {
+            const msg = `Borrowdale Request: ${service}. I would like to make an inquiry.`;
+            window.open(`https://wa.me/263779388560?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function requestPlacement() {
+            const msg = `Hello WarStreet,\n\nI want to request a placement on Borrowdale Road.\n\nBusiness Name:\nService Type:\nLocation:\nContact Details:\n\nPlease share next steps.`;
+            window.open(`https://wa.me/263779388560?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Mouse follow effect for billboard energy
+        document.addEventListener('mousemove', (e) => {
+            const billboard = document.getElementById('billboard');
+            
+            if (billboard) {
+                const rect = billboard.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                billboard.style.setProperty('--mouse-x', `${x}%`);
+                billboard.style.setProperty('--mouse-y', `${y}%`);
+            }
+        });
+    </script>
+</body>
+</html>

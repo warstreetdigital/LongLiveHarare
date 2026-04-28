@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samora Machel Ave | Sound Layer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background: #050505; color: #F5F5F5; font-family: 'Inter', sans-serif; overflow-x: hidden; position: relative; }
+        
+        /* Premium Noise Texture */
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Global Vignette */
+        .vignette {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .gold-glow { 
+            background: radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.12) 0%, transparent 80%); 
+        }
+        .font-anton { font-family: 'Antonio', sans-serif; }
+
+        /* System Reveal animations */
+        .reveal-node {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-node.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Ambient Scanning */
+        .energy-scan {
+            position: fixed; top: 0; left: 0; width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.1), transparent);
+            z-index: 5;
+            animation: scanVertical 15s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes scanVertical {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Pulse for Nightlife identity */
+        .nightlife-pulse {
+            animation: softPulse 4s infinite ease-in-out;
+        }
+        @keyframes softPulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s ease;
+        }
+        .glass-panel:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        /* Artist Takeover Styles */
+        .artist-ambient-bg {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 140%; height: 140%;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(60px);
+            opacity: 0.1;
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .artist-ambient-bg.active-state {
+            opacity: 1;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+            animation: ambientBreathe 6s infinite ease-in-out;
+        }
+
+        @keyframes ambientBreathe {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes ambientDrift {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            100% { transform: translate(-45%, -55%) scale(1.1); opacity: 0.9; }
+        }
+
+        .artist-card-aura {
+            animation: auraBreathe 8s infinite ease-in-out;
+        }
+
+        @keyframes auraBreathe {
+            0%, 100% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+            50% { box-shadow: 0 0 100px rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); }
+        }
+
+        .light-sweep {
+            position: relative; overflow: hidden;
+        }
+        .light-sweep::after {
+            content: '';
+            position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+            transform: rotate(45deg);
+            animation: lightSweep 15s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes lightSweep {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .cta-pulse {
+            animation: ctaPulse 4s infinite ease-in-out;
+            box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cta-pulse:hover {
+            transform: scale(1.05) translateY(-2px);
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        }
+        @keyframes ctaPulse {
+            0%, 100% { box-shadow: 0 0 0 rgba(245, 158, 11, 0); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.2); }
+        }
+
+        /* Featured Card States */
+        #node-spotlight {
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #node-spotlight img {
+            filter: grayscale(1) brightness(0.7);
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #node-spotlight.active-state {
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 80px rgba(245, 158, 11, 0.15);
+        }
+        #node-spotlight.active-state img {
+            filter: grayscale(0) brightness(1);
+            transform: scale(1.05);
+        }
+        #node-spotlight.active-state #spotlight-overlay {
+            opacity: 0.4;
+        }
+        
+        .artist-title {
+            text-shadow: 0 0 30px rgba(245, 158, 11, 0.1);
+            transition: text-shadow 0.8s ease;
+        }
+        .group:hover .artist-title {
+            text-shadow: 0 0 50px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Radio Top Bar */
+        .radio-bar {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            pointer-events: auto;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .radio-bar:active {
+            transform: translateX(-50%) scale(0.98);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .signal-indicator {
+            width: 5px;
+            height: 5px;
+            background: #f59e0b;
+            border-radius: 50%;
+            position: relative;
+        }
+        .signal-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: inherit;
+            animation: signalPulse 2s infinite ease-out;
+        }
+        @keyframes signalPulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+        }
+
+        .freq-flicker {
+            animation: freqFlicker 5s infinite steps(1);
+        }
+        @keyframes freqFlicker {
+            0%, 90%, 100% { opacity: 1; }
+            92% { opacity: 0.7; transform: translateX(1px); }
+            94% { opacity: 1; transform: translateX(0); }
+            96% { opacity: 0.8; transform: translateX(-1px); }
+        }
+
+        .waveform-container {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 8px;
+        }
+        .wave-bar {
+            width: 1.5px;
+            height: 100%;
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 1px;
+            animation: waveBounce 1.2s infinite ease-in-out;
+        }
+        @keyframes waveBounce {
+            0%, 100% { height: 2px; }
+            50% { height: 8px; }
+        }
+
+        /* Playlist Item Refinement */
+        .playlist-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+        }
+        .playlist-row:hover {
+            background: rgba(245, 158, 11, 0.02);
+            padding-left: 24px;
+            border-bottom-color: rgba(245, 158, 11, 0.1);
+        }
+        .playlist-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: #f59e0b;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .playlist-row:hover::before {
+            opacity: 0.5;
+        }
+        .playlist-row.active-track {
+            background: rgba(245, 158, 11, 0.04);
+            border-bottom-color: rgba(245, 158, 11, 0.2);
+            padding-left: 24px;
+        }
+        .playlist-row.active-track::before {
+            opacity: 1;
+        }
+        .playlist-row.active-track .track-play-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .playlist-row.active-track h4 {
+            color: #f59e0b;
+        }
+        .playlist-row:hover .track-play-icon {
+            transform: scale(1.2);
+            opacity: 1;
+            filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));
+        }
+
+        /* Footer System */
+        .footer-system {
+            opacity: 0;
+            transition: opacity 2s ease;
+            pointer-events: none;
+            user-select: none;
+        }
+        .footer-system.ready {
+            opacity: 1;
+        }
+        .footer-glow-line {
+            width: 160px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.5), transparent);
+            filter: blur(2px);
+            opacity: 0;
+            margin-bottom: 24px;
+        }
+        .footer-text {
+            font-size: 8px;
+            font-weight: 300;
+            letter-spacing: 0.8em;
+            color: rgba(255, 255, 255, 0.15);
+            opacity: 0;
+            transition: color 1s ease;
+        }
+
+        /* Breathing Cycle Logic */
+        .footer-active .footer-glow-line {
+            animation: footerGlowCycle 10s infinite;
+        }
+        .footer-active .footer-text {
+            animation: footerTextCycle 10s infinite;
+        }
+
+        @keyframes footerGlowCycle {
+            0%, 40%, 90%, 100% { opacity: 0; transform: scaleX(0.7); }
+            50%, 80% { opacity: 1; transform: scaleX(1); }
+        }
+        @keyframes footerTextCycle {
+            0%, 50%, 85%, 100% { opacity: 0; transform: translateY(5px); }
+            60%, 75% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Interaction Response */
+        .footer-respond .footer-text {
+            color: rgba(245, 158, 11, 0.6) !important;
+            opacity: 1 !important;
+            animation: none !important;
+            transform: translateY(0) !important;
+        }
+        .footer-respond .footer-glow-line {
+            opacity: 1 !important;
+            width: 240px;
+            background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.8), transparent);
+            animation: none !important;
+            transform: scaleX(1.2) !important;
+        }
+
+        /* Toast System */
+        .toast-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(245, 158, 11, 0.9);
+            color: black;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            tracking: 0.2em;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="fixed inset-0 gold-glow pointer-events-none"></div>
+    <div class="vignette"></div>
+    <div class="energy-scan"></div>
+
+    <!-- Persistent Audio Layer -->
+    <!-- NOTE: Upload /assets/audio/samora_radio.mp3 to enable sound features -->
+    <audio id="main-audio" preload="none" style="display:none"></audio>
+
+    <header class="sticky top-0 z-50 bg-black/40 backdrop-blur-md p-6 flex justify-between items-start reveal-node" id="node-header">
+        <a href="javascript:goHome()" class="flex items-center gap-4 group">
+            <div class="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center group-hover:bg-amber-500 group-hover:text-black transition-all">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </div>
+            <div class="hidden sm:block">
+                <span class="block text-[9px] uppercase tracking-widest text-amber-500/60 font-bold">Return to Grid</span>
+                <span class="text-xs font-black uppercase tracking-tight">System Terminal</span>
+            </div>
+        </a>
+        <div class="text-right">
+            <h1 class="text-4xl font-black font-anton tracking-tighter leading-none">SAMORA MACHEL</h1>
+            <p class="text-[9px] uppercase tracking-[0.4em] text-amber-500 font-bold mt-1">SND • NRG • NGT</p>
+        </div>
+    </header>
+
+    <!-- Minimal Fixed Radio -->
+    <div class="radio-bar reveal-node" id="node-radio">
+        <div class="flex items-center gap-3">
+            <div class="signal-indicator shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
+            <div class="flex flex-col">
+                <span class="text-[8px] font-black uppercase tracking-[0.2em] text-amber-500/80 leading-none">LIVE</span>
+                <span class="text-[7px] font-bold uppercase tracking-[0.3em] text-gray-500 mt-1">STREET RADIO</span>
+            </div>
+        </div>
+        <div class="w-[1px] h-4 bg-white/10"></div>
+        <div class="waveform-container px-1">
+            <div class="wave-bar" style="animation-delay: 0s"></div>
+            <div class="wave-bar" style="animation-delay: -0.4s"></div>
+            <div class="wave-bar" style="animation-delay: -0.8s"></div>
+        </div>
+            <button onclick="CityBus.togglePlay('samora_radio', 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/01-long-live-harare.mp3', 'STREET RADIO')" class="flex items-center gap-2 group ml-1">
+            <i data-lucide="play" id="icon-samora_radio" class="w-3 h-3 text-white group-hover:text-amber-500 transition-colors"></i>
+            <span class="text-[8px] font-bold uppercase tracking-widest text-white/60 group-hover:text-white freq-flicker">108.4 MHZ</span>
+        </button>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-6 pt-24 pb-32 space-y-24 relative z-10">
+        <!-- Main Body Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            
+            <!-- Featured Artist Section (Hero) -->
+            <section class="lg:col-span-12 space-y-6 relative">
+                <div id="node-spotlight-glow" class="artist-ambient-bg"></div>
+                
+                <div class="flex items-center gap-4 px-2">
+                    <span class="text-[9px] font-black uppercase tracking-[0.4em] text-amber-500">Featured Artist</span>
+                    <div class="flex-1 h-[1px] bg-amber-500/10"></div>
+                </div>
+                
+                <div class="relative group reveal-node overflow-hidden rounded-[3rem] border border-white/10 artist-card-aura light-sweep" id="node-spotlight">
+                    <div class="aspect-[16/9] md:aspect-[21/9] bg-black">
+                        <img src="https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/long-live-harare/cover.jpg" alt="Rayblack" class="w-full h-full object-cover transition-all duration-[3000ms] ease-out" style="object-position: center 20%">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 transition-opacity duration-1000" id="spotlight-overlay"></div>
+                    
+                    <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16 relative z-20">
+                        <div class="max-w-2xl">
+                            <h2 class="text-6xl md:text-8xl font-black font-anton uppercase leading-none tracking-tighter artist-title whitespace-nowrap md:whitespace-normal">RAYBLACK.HE.IS</h2>
+                            <p class="text-[10px] font-bold tracking-[0.5em] text-white/30 mt-2 uppercase">he.is</p>
+                            <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-sm hidden md:block">Defining the contemporary sound of Samora. Energy captured in frequencies.</p>
+                            
+                            <div class="flex items-center gap-6 mt-8">
+                                <button id="featured-btn" onclick="CityBus.togglePlay('featured', 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/01-long-live-harare.mp3', 'Long Live Harare')" class="bg-white text-black px-12 py-4 rounded-full text-xs font-black uppercase tracking-widest cta-pulse active:scale-95 flex items-center gap-3">
+                                    <i data-lucide="play" id="icon-featured" class="w-4 h-4 fill-current"></i> <span id="featured-btn-text">LISTEN NOW</span>
+                                </button>
+                                <div class="hidden sm:flex items-center gap-2">
+                                    <span class="text-[9px] font-bold uppercase tracking-widest text-amber-500/60">Pulse Mode Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Street Drop Section (Refined Rows) -->
+            <section class="lg:col-span-12 space-y-12 pb-12 reveal-node" id="node-archive">
+                <div class="flex justify-between items-center px-2">
+                    <div class="flex items-center gap-3">
+                        <span class="w-1 h-1 bg-amber-500 rounded-full"></span>
+                        <h3 class="text-[9px] font-black uppercase tracking-[0.5em] text-white/40">ALBUM — LONG LIVE HARARE</h3>
+                    </div>
+                    <div class="w-16 h-[1px] bg-white/5"></div>
+                </div>
+                
+                <div id="track-list" class="divide-y divide-white/5 border-t border-b border-white/5">
+                    <!-- Playlist Rows Injected Here -->
+                </div>
+
+                <!-- External Connection -->
+                <div class="flex justify-center pt-8">
+                    <a href="https://youtube.com/@warstreet_studios?si=FKs4YKr1O9675Z7l" target="_blank" class="flex items-center gap-3 px-8 py-3 rounded-full border border-white/5 hover:border-amber-500/20 hover:bg-amber-500/5 transition-all group">
+                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-white/40 group-hover:text-amber-500 transition-colors">FOLLOW ARTIST</span>
+                        <i data-lucide="external-link" class="w-3 h-3 text-white/20 group-hover:text-amber-500 transition-colors"></i>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Events Layer -->
+    <section class="max-w-4xl mx-auto px-6 pb-48 space-y-12 reveal-node" id="node-events">
+        <div class="flex justify-between items-center px-2">
+            <div class="flex items-center gap-3">
+                <span class="w-1 h-1 bg-amber-500 rounded-full"></span>
+                <h3 class="text-[9px] font-black uppercase tracking-[0.5em] text-white/40">CITY EVENTS</h3>
+            </div>
+            <div class="w-16 h-[1px] bg-white/5"></div>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Event 01 -->
+            <div class="glass-panel rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[7px] font-black tracking-widest uppercase">LIVE / UPCOMING</span>
+                        <span class="text-[8px] font-bold text-white/30 uppercase tracking-widest">Harare</span>
+                    </div>
+                    <h4 class="text-2xl font-black font-anton uppercase tracking-tight">DOEK & SLAY — HARARE EDITION</h4>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Date Soon • Venue TBA</p>
+                </div>
+                <button onclick="CityBus.requestAccess('Ticketing opens soon')" class="w-full md:w-auto px-10 py-4 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all active:scale-95">
+                    REQUEST ACCESS
+                </button>
+            </div>
+
+            <!-- Event 02 -->
+            <div class="glass-panel rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-2 py-0.5 rounded-full bg-white/5 text-white/40 text-[7px] font-black tracking-widest uppercase">LIMITED</span>
+                        <span class="text-[8px] font-bold text-white/30 uppercase tracking-widest">Harare</span>
+                    </div>
+                    <h4 class="text-2xl font-black font-anton uppercase tracking-tight">THE LISTENING ROOM</h4>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Coming Soon • Private Location</p>
+                </div>
+                <button onclick="CityBus.requestAccess('Calendar updating — access coming soon')" class="w-full md:w-auto px-10 py-4 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all active:scale-95">
+                    REQUEST ACCESS
+                </button>
+            </div>
+
+            <!-- Event 03 -->
+            <div class="glass-panel rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[7px] font-black tracking-widest uppercase">ONGOING</span>
+                        <span class="text-[8px] font-bold text-white/30 uppercase tracking-widest">Samora</span>
+                    </div>
+                    <h4 class="text-2xl font-black font-anton uppercase tracking-tight">AFTER HOURS — SAMORA</h4>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Tonight • Street Takeover</p>
+                </div>
+                <button onclick="CityBus.requestAccess('Access coming soon')" class="w-full md:w-auto px-10 py-4 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all active:scale-95">
+                    REQUEST ACCESS
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast Layer -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- System Footer -->
+    <footer id="system-footer" class="footer-system flex flex-col items-center pb-32 pt-24">
+        <div class="footer-glow-line"></div>
+        <p class="footer-text">POWERED BY WARSTREET EXPERIENCE MODEL</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Reveal Sequence
+        window.addEventListener('DOMContentLoaded', () => {
+            const nodes = [
+                { id: 'node-header', delay: 50 },
+                { id: 'node-radio', delay: 150 },
+                { id: 'node-spotlight', delay: 250 },
+                { id: 'node-archive', delay: 350 },
+                { id: 'node-events', delay: 450 }
+            ];
+
+            nodes.forEach(node => {
+                const el = document.getElementById(node.id);
+                if (el) {
+                    setTimeout(() => {
+                        el.classList.add('active');
+                    }, node.delay);
+                }
+            });
+        });
+
+        const CityBus = {
+            audio: document.getElementById('main-audio'),
+            currentId: null,
+            isPlaying: false,
+            trackEvent(name, val) {
+                console.log(`[Tracking] ${name}: ${val}`);
+                const logs = JSON.parse(localStorage.getItem('eh_logs') || '[]');
+                logs.push({ name, val, time: Date.now() });
+                localStorage.setItem('eh_logs', JSON.stringify(logs.slice(-50)));
+            },
+            init() {
+                if (!this.audio) return;
+                
+                this.audio.addEventListener('play', () => {
+                    this.isPlaying = true;
+                    this.updateUI();
+                });
+
+                this.audio.addEventListener('pause', () => {
+                    this.isPlaying = false;
+                    this.updateUI();
+                });
+
+                this.audio.addEventListener('ended', () => {
+                    this.isPlaying = false;
+                    this.updateUI();
+                });
+            },
+            updateUI() {
+                const allIcons = document.querySelectorAll('[id^="icon-"]');
+                allIcons.forEach(icon => {
+                    const id = icon.id.split('icon-')[1];
+                    if (id === this.currentId && this.isPlaying) {
+                        icon.setAttribute('data-lucide', 'pause');
+                    } else {
+                        icon.setAttribute('data-lucide', 'play');
+                    }
+                });
+
+                // Featured Card Specific Logic
+                const spotlight = document.getElementById('node-spotlight');
+                const spotlightGlow = document.getElementById('node-spotlight-glow');
+                const featuredBtnText = document.getElementById('featured-btn-text');
+                
+                if ((this.currentId === 'featured' || this.currentId === 'samora_radio') && this.isPlaying) {
+                    spotlight.classList.add('active-state');
+                    spotlightGlow.classList.add('active-state'); // This triggers the CSS sibling selector logic if modified slightly or we can just add class
+                    featuredBtnText.innerText = 'LISTENING';
+                } else {
+                    spotlight.classList.remove('active-state');
+                    spotlightGlow.classList.remove('active-state');
+                    featuredBtnText.innerText = 'LISTEN NOW';
+                }
+
+                // Playlist Rows Logic
+                const rows = document.querySelectorAll('.playlist-row');
+                rows.forEach(row => {
+                    const rowId = row.getAttribute('data-track-id');
+                    if (rowId === this.currentId && this.isPlaying) {
+                        row.classList.add('active-track');
+                    } else {
+                        row.classList.remove('active-track');
+                    }
+                });
+
+                lucide.createIcons();
+            },
+            togglePlay(id, src, name) {
+                if (!this.audio) return;
+
+                if (this.currentId === id) {
+                    if (this.audio.paused) {
+                        this.audio.play();
+                    } else {
+                        this.audio.pause();
+                    }
+                } else {
+                    this.audio.src = src;
+                    this.audio.onerror = () => {
+                        console.warn(`[Audio Trace] Failed to load: ${src}`);
+                        this.trackEvent('audio_error', src);
+                    };
+                    this.audio.play().catch(e => {
+                        console.log("Auto-play blocked. User interaction required.");
+                    });
+                    this.currentId = id;
+                    this.trackEvent('play_audio', name);
+                }
+            },
+            requestAccess(message) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = "toast";
+                toast.innerText = message;
+                container.appendChild(toast);
+                
+                // Trigger animation
+                setTimeout(() => toast.classList.add('visible'), 10);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    toast.classList.remove('visible');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+
+                this.trackEvent('request_access', message);
+            },
+            triggerFooterPulse() {
+                const footer = document.getElementById('system-footer');
+                if (!footer) return;
+
+                footer.classList.remove('footer-active');
+                footer.classList.add('footer-respond');
+
+                if (this.footerTimeout) clearTimeout(this.footerTimeout);
+                
+                this.footerTimeout = setTimeout(() => {
+                    footer.classList.remove('footer-respond');
+                    setTimeout(() => {
+                        footer.classList.add('footer-active');
+                    }, 500);
+                }, 2000);
+            }
+        };
+
+        function goHome() {
+            window.location.href = "index.html#home";
+        }
+
+        CityBus.init();
+
+        // Footer Lifecycle
+        const footer = document.getElementById('system-footer');
+        if (footer) {
+            setTimeout(() => {
+                footer.classList.add('ready');
+                footer.classList.add('footer-active');
+            }, 3000);
+        }
+
+        // Global System Interaction
+        document.addEventListener('mousedown', () => CityBus.triggerFooterPulse());
+        document.addEventListener('touchstart', () => CityBus.triggerFooterPulse(), { passive: true });
+
+        const tracks = [
+            { id: 'track02', title: 'First Day Out', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/02-first-day-out.mp3', duration: '—' },
+            { id: 'track03', title: 'Harare Street Talk', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/03-harare-street-talk.mp3', duration: '—' },
+            { id: 'track04', title: 'No Receipts', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/04-no-receipts.mp3', duration: '—' },
+            { id: 'track05', title: 'Mvura Yemwedzi', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/05-mvura-yemwedzi.mp3', duration: '—' },
+            { id: 'track06', title: 'Ndiri Kure', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/06-ndiri-kure.mp3', duration: '—' },
+            { id: 'track07', title: 'City Moves', art: 'Rayblack.he.is', src: 'https://pub-e81a254724df4bfaa01f780b72af68c4.r2.dev/samora/rayblack.he.is/07-city-moves.mp3', duration: '—' }
+        ];
+
+        const container = document.getElementById('track-list');
+        tracks.forEach((t, index) => {
+            const div = document.createElement('div');
+            div.className = "playlist-row group";
+            div.setAttribute('data-track-id', t.id);
+            div.onclick = () => CityBus.togglePlay(t.id, t.src, t.title);
+            const num = (index + 2).toString().padStart(2, '0');
+            div.innerHTML = `
+                <div class="flex items-center gap-8">
+                    <span class="text-[9px] font-black text-white/5 group-hover:text-amber-500/20 transition-colors tracking-tighter">${num}</span>
+                    <div>
+                        <h4 class="font-black font-anton text-xl tracking-tight uppercase group-hover:text-amber-500 transition-colors">${t.title}</h4>
+                        <p class="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em] mt-1">${t.art}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <span class="text-[9px] text-white/5 font-bold hidden sm:block tracking-widest">${t.duration}</span>
+                    <div class="w-10 h-10 flex items-center justify-center opacity-20 group-hover:opacity-100 transition-all track-play-icon">
+                        <i data-lucide="play" id="icon-${t.id}" class="w-3 h-3 text-amber-500 fill-current"></i>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>
